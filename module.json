@@ -1,0 +1,32 @@
+{
+  "id": "velumaris-fmod-journals",
+  "title": "Velumaris: Journals",
+  "description": "An advanced journal system for Foundry VTT that mimics Obsidian-style linked notes, backlinks, and rich document editing for the Velumaris campaign setting.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "EDM2001",
+      "url": "https://github.com/EDM2001"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/journals.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    }
+  ],
+  "url": "https://github.com/EDM2001/velumaris-fmod-journals",
+  "manifest": "https://github.com/EDM2001/velumaris-fmod-journals/releases/latest/download/module.json",
+  "download": "https://github.com/EDM2001/velumaris-fmod-journals/releases/latest/download/velumaris-fmod-journals.zip"
+}
