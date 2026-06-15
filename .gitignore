@@ -3,3 +3,18 @@ dist/
 *.zip
 .DS_Store
 Thumbs.db
+
+# Secrets & credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert
+*.crt
+secrets.json
+secrets.*.json
+config.local.*
+foundry-config.json
