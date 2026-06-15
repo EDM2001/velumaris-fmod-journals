@@ -22,9 +22,19 @@ https://github.com/EDM2001/velumaris-fmod-journals/releases/latest/download/modu
 |-------------|--------|
 | v14         | Verified |
 
+## Releasing a New Version
+
+1. Commit and push your changes
+2. Tag the release and push the tag:
+   ```
+   git tag v1.2.3
+   git push --tags
+   ```
+3. GitHub Actions will automatically patch `module.json` with the new version, zip the module, and publish a GitHub Release with both files as public assets — Foundry will detect the update via the manifest URL.
+
 ## Development
 
-See [CLAUDE.md](CLAUDE.md) for local setup and release instructions.
+See [CLAUDE.md](CLAUDE.md) for local setup details.
 
 ## License
 
