@@ -30,8 +30,8 @@ Foundry theme around the page.
   current scene) lives on the entry's flags under this module's id, written with
   `{render: false}` so the journal does not re-render and lose its scroll.
 - **`scripts/table-sheet.mjs` is framework-free.** Everything Foundry-shaped goes through the
-  `env` object `main.mjs` builds. The review mock in the vault session's scratchpad runs that
-  exact file with a fake env, so keep Foundry out of it.
+  `env` object `main.mjs` builds. The review mock (`dev/table-sheet-mock/`, see its header) runs
+  that exact file with a fake env, so keep Foundry out of it. `dev/` is never deployed.
 - **The PC strip format is a cross-repo contract.** `parsePcLine()` reads what
   `pcStripBlock()` in `../velumaris-utils/scripts/foundry/table-sheet.js` writes. A line that
   does not parse leaves the whole list untouched, so a format change degrades, never breaks.
