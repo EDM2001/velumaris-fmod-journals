@@ -2,7 +2,7 @@
   "id": "velumaris-fmod-journals",
   "title": "Velumaris: Journals",
   "description": "The Velumaris journals at the table: the session Table Sheet as a working sheet (party grid, tickable secrets, a scene tracker, name cards, map chips, boxed read-aloud) in the Velumaris house look, following Foundry's light or dark theme. GM-only pages; nothing changes for players.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "compatibility": {
     "minimum": "14",
     "verified": "14"

@@ -134,7 +134,11 @@
     color: var(--vel-gold);
     text-decoration: underline dotted;
     text-underline-offset: 2px;
-    white-space: normal;
+    /* Foundry lets a content link break anywhere, which split "read aloud" mid-word
+       in the drawer. The labels here are a word or two, so keep them whole. */
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
   }
   & a.content-link i {
     display: none;
@@ -210,21 +214,28 @@
   line-height: 1.3;
   font-variant-numeric: tabular-nums;
 
+  /* Foundry paints the header row itself (a red band in the dnd5e theme), so the
+     row groups are reset as well as the cells. */
+  & thead,
+  & tbody,
   & tr,
   & th,
   & td {
     background: none;
     border: none;
+    text-shadow: none;
   }
   & th {
     font-family: var(--vel-ui);
     font-size: 10px;
     font-weight: 500;
+    line-height: 1.2;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--vel-ink-3);
     text-align: left;
-    padding: 0 10px 4px 0;
+    vertical-align: bottom;
+    padding: 4px 10px 4px 0;
     border-bottom: 1px solid var(--vel-rule);
   }
   & td {
