@@ -22,7 +22,10 @@ const DND5E_CSS = path.join(process.env.LOCALAPPDATA || '', 'FoundryVTT', 'Data'
 const data = JSON.parse(fs.readFileSync(path.join(DIR, 'story-pages.json'), 'utf8'));
 
 // ── Module CSS, fonts inlined ──
-let css = ['journals.css', 'story-pages.css'].map((f) => fs.readFileSync(path.join(MOD, 'styles', f), 'utf8')).join('\n');
+// In Foundry journals.css @imports story-pages.css; here both are inlined and the import dropped.
+let css = ['journals.css', 'story-pages.css']
+  .map((f) => fs.readFileSync(path.join(MOD, 'styles', f), 'utf8').replace(/^@import[^;]*;[ \t]*$/gm, ''))
+  .join('\n');
 css = css.replace(/url\('\.\.\/fonts\/([^']+)'\)/g, (_m, f) => `url(data:font/woff2;base64,${fs.readFileSync(path.join(MOD, 'fonts', f)).toString('base64')})`);
 
 // ── dnd5e's own journal rules: what the module's CSS has to beat in Foundry ──

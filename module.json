@@ -17,8 +17,7 @@
     "scripts/main.mjs"
   ],
   "styles": [
-    "styles/journals.css",
-    "styles/story-pages.css"
+    "styles/journals.css"
   ],
   "languages": [
     {
