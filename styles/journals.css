@@ -472,6 +472,53 @@
   color: var(--vel-ink-3);
 }
 
+/* Spare names: tap one when it gets used. A used name stands out; it is the record. */
+.vel-ts.vel-ts .vel-spares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 5px;
+}
+.vel-ts.vel-ts .vel-spare {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 1px 8px 2px;
+  border: 1px solid var(--vel-rule);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--vel-ink-2);
+  background: var(--vel-panel);
+
+  & .vel-spare-say {
+    font-size: 10.5px;
+    color: var(--vel-ink-3);
+  }
+  &:hover {
+    border-color: var(--vel-gold-2);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--vel-gold);
+    outline-offset: 1px;
+  }
+  &.is-used {
+    background: var(--vel-gold-soft);
+    border-color: var(--vel-gold);
+    color: var(--vel-gold);
+    font-weight: 600;
+  }
+  &.is-used::before {
+    content: '\2713';
+    margin-right: 1px;
+  }
+  &.is-used .vel-spare-say {
+    color: var(--vel-gold-2);
+    font-weight: 400;
+  }
+}
+
 /* ── Pages 2 and 3: spoken. Stage directions small, the words in a box. ── */
 
 .vel-ts--recap.vel-ts--recap,

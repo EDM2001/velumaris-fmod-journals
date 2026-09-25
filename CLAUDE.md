@@ -16,6 +16,7 @@ cells alike, through a MutationObserver) and builds on them:
 - secrets get tick boxes, scenes become a tracker (past scenes fold to their title)
 - scene lines get map chips from `meta.scenes` (view for the GM; show to players on a 2nd tap)
 - names get a hover card (portrait + the NPC note's lead line) and open their NPC page
+- spare names become chips the DM taps when one is used; a used name stays lit (the record)
 - the spoken pages get boxed read-aloud, and the Read aloud page follows the tracker
 - the GM Screen: when the drawer still shows an older session's sheet, the GM is offered a
   one-click repoint (never automatic: the relay may not write world settings)

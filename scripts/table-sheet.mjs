@@ -138,6 +138,35 @@ function buildSheet(wrapper, meta, env) {
   buildSecrets(wrapper, meta, env);
   buildScenes(wrapper, meta, env);
   buildNames(wrapper, env);
+  buildSpare(wrapper, meta, env);
+}
+
+/**
+ * Spare names become chips the DM taps when one is used at the table (DM request
+ * 2026-09-25: "the spare names need a way to check them to know what I used").
+ * A used name stands OUT rather than fading, because afterwards it is the record
+ * of who was invented tonight.
+ */
+function buildSpare(wrapper, meta, env) {
+  const p = wrapper.querySelector('.vel-sec--spare p');
+  if (!p) return;
+  const names = p.textContent.split(' · ').map((s) => s.trim()).filter(Boolean);
+  if (names.length < 2) return;
+  const box = el('div', 'vel-spares');
+  for (const entry of names) {
+    const m = /^(.+?)\s*\(([^)]+)\)$/.exec(entry);
+    const chip = el('button', 'vel-spare');
+    chip.type = 'button';
+    chip.dataset.velKey = textKey(entry);
+    chip.appendChild(el('span', 'vel-spare-name', m ? m[1] : entry));
+    if (m) chip.appendChild(el('span', 'vel-spare-say', m[2]));
+    chip.addEventListener('click', () => {
+      env.setState(meta.entryId, { spare: { [chip.dataset.velKey]: !chip.classList.contains('is-used') } });
+    });
+    box.appendChild(chip);
+  }
+  p.hidden = true;
+  p.parentElement.appendChild(box);
 }
 
 /**
@@ -465,6 +494,12 @@ function applyState(wrapper, meta, state, opts = {}) {
       const i = Number(li.dataset.velScene);
       li.classList.toggle('is-current', cur === i);
       li.classList.toggle('is-past', cur !== null && i < cur);
+    }
+    const spare = state.spare || {};
+    for (const chip of wrapper.querySelectorAll('.vel-spare')) {
+      const used = !!spare[chip.dataset.velKey];
+      chip.classList.toggle('is-used', used);
+      chip.setAttribute('aria-pressed', used ? 'true' : 'false');
     }
   }
 
