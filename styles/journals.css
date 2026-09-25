@@ -1,1 +1,609 @@
-/* velumaris-fmod-journals styles */
+/*
+ * Velumaris: Journals.
+ *
+ * Look B (DM ruling 2026-09-25): the archives' house type and colours at working
+ * weight, no ornament. Cinzel for labels, Outfit for the working text, EB Garamond
+ * for the words the DM speaks. Every rule is scoped to `.vel-ts` or `.vel-card`,
+ * classes that scripts/table-sheet.mjs adds, so with the module off (or its
+ * "new look" setting unticked) not one journal changes.
+ *
+ * Foundry's own CSS is in cascade layers and this file is not, so a plain class
+ * wins over it. The doubled `.vel-ts.vel-ts` is for the system's journal sheet
+ * styles, which are more specific.
+ */
+
+@font-face {
+  font-family: 'Vel Cinzel';
+  src: url('../fonts/cinzel-latin.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vel Outfit';
+  src: url('../fonts/outfit-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vel Garamond';
+  src: url('../fonts/ebgaramond-latin.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vel Garamond';
+  src: url('../fonts/ebgaramond-italic-latin.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── Tokens. The theme class comes from the nearest Foundry theme around the page. ── */
+
+.vel-dark {
+  --vel-bg: #0f172a;
+  --vel-panel: #141e35;
+  --vel-panel-2: #1b2743;
+  --vel-ink: #e6e9ef;
+  --vel-ink-2: #b6bfcd;
+  --vel-ink-3: #808b9f;
+  --vel-rule: #27344f;
+  --vel-rule-soft: rgba(128, 139, 159, 0.18);
+  --vel-gold: #fac775;
+  --vel-gold-2: #d9a44a;
+  --vel-gold-soft: rgba(250, 199, 117, 0.12);
+  --vel-on-gold: #1a1204;
+  --vel-box: #1a2442;
+  --vel-box-ink: #f1f2f5;
+  --vel-warn: #f0997b;
+  --vel-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.vel-light {
+  --vel-bg: #fbfaf7;
+  --vel-panel: #ffffff;
+  --vel-panel-2: #f1efe8;
+  --vel-ink: #172031;
+  --vel-ink-2: #3e495d;
+  --vel-ink-3: #6a7385;
+  --vel-rule: #dcd7cb;
+  --vel-rule-soft: rgba(23, 32, 49, 0.1);
+  --vel-gold: #8a5a0e;
+  --vel-gold-2: #a8741f;
+  --vel-gold-soft: rgba(138, 90, 14, 0.1);
+  --vel-on-gold: #ffffff;
+  --vel-box: #f3ecdb;
+  --vel-box-ink: #1f1a12;
+  --vel-warn: #9a3325;
+  --vel-shadow: 0 10px 28px rgba(23, 32, 49, 0.2);
+}
+
+/* ── The page ─────────────────────────────────────────────────────────────── */
+
+.vel-ts.vel-ts {
+  --vel-display: 'Vel Cinzel', 'Cinzel', Georgia, serif;
+  --vel-ui: 'Vel Outfit', 'Outfit', 'Signika', system-ui, sans-serif;
+  --vel-read: 'Vel Garamond', 'EB Garamond', Georgia, serif;
+  container-type: inline-size;
+  background: var(--vel-bg);
+  color: var(--vel-ink);
+  font-family: var(--vel-ui);
+  font-size: 13px;
+  line-height: 1.38;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--vel-rule);
+  border-radius: 6px;
+
+  & [hidden] {
+    display: none !important;
+  }
+  & p {
+    margin: 0 0 6px;
+  }
+  & strong {
+    font-weight: 600;
+  }
+  & ul,
+  & ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  & li {
+    margin: 0;
+  }
+  & h2 {
+    font-family: var(--vel-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--vel-gold);
+    border: none;
+    border-bottom: 1px solid var(--vel-rule);
+    margin: 0 0 6px;
+    padding: 0 0 3px;
+    text-shadow: none;
+  }
+  & a.content-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--vel-gold);
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+    white-space: normal;
+  }
+  & a.content-link i {
+    display: none;
+  }
+}
+
+/*
+ * ── Page 1: the layout. ──
+ * Measured against the DM's GM Screen (2026-09-25): the Quick Ref cell is half the
+ * screen, ~950px on a 1920 display, and 60% of its height. The party always runs
+ * the full width (its "On them" column needs it). Below it, two columns in a half
+ * drawer (scenes left, the lists right), three in a whole one.
+ */
+
+.vel-ts--sheet .vel-grid {
+  display: grid;
+  gap: 10px 20px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@container (min-width: 700px) {
+  .vel-ts--sheet .vel-grid {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      'party party'
+      'scenes secrets'
+      'scenes names'
+      'scenes spare';
+    align-items: start;
+  }
+  .vel-ts--sheet .vel-sec--party { grid-area: party; }
+  .vel-ts--sheet .vel-sec--scenes { grid-area: scenes; }
+  .vel-ts--sheet .vel-sec--secrets { grid-area: secrets; }
+  .vel-ts--sheet .vel-sec--names { grid-area: names; }
+  .vel-ts--sheet .vel-sec--spare { grid-area: spare; }
+  .vel-ts--sheet .vel-sec--other { grid-column: 1 / -1; }
+}
+@container (min-width: 1250px) {
+  .vel-ts--sheet .vel-grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'party party party'
+      'scenes secrets names'
+      'scenes secrets spare';
+  }
+}
+
+.vel-ts.vel-ts .vel-head {
+  font-size: 12.5px;
+  color: var(--vel-ink-2);
+  margin: 0 0 6px;
+  & strong {
+    color: var(--vel-gold);
+  }
+  & .vel-head-note {
+    display: block;
+    font-size: 11px;
+    color: var(--vel-ink-3);
+    margin-top: 1px;
+  }
+}
+
+/* ── The party grid ── */
+
+.vel-ts.vel-ts .vel-party {
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+  background: none;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+
+  & tr,
+  & th,
+  & td {
+    background: none;
+    border: none;
+  }
+  & th {
+    font-family: var(--vel-ui);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--vel-ink-3);
+    text-align: left;
+    padding: 0 10px 4px 0;
+    border-bottom: 1px solid var(--vel-rule);
+  }
+  & td {
+    padding: 2px 9px 2px 0;
+    border-bottom: 1px solid var(--vel-rule-soft);
+    color: var(--vel-ink-2);
+    vertical-align: baseline;
+  }
+  & tbody tr:last-child td {
+    border-bottom: none;
+  }
+  & .num {
+    text-align: right;
+  }
+  & td.pc {
+    color: var(--vel-ink);
+    font-weight: 600;
+  }
+  & td.ac {
+    color: var(--vel-ink);
+    font-size: 14px;
+  }
+  & td.ceil b {
+    color: var(--vel-gold);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  & td.ceil[title] {
+    cursor: help;
+  }
+  & td.pp {
+    color: var(--vel-ink);
+  }
+  & td.notes {
+    color: var(--vel-ink-3);
+    font-size: 11.5px;
+    line-height: 1.25;
+    padding-right: 0;
+  }
+  & .dim {
+    color: var(--vel-ink-3);
+  }
+}
+@container (max-width: 520px) {
+  .vel-ts .vel-party .notes,
+  .vel-ts .vel-party .save {
+    display: none;
+  }
+}
+
+/* ── Secrets: tick them off ── */
+
+.vel-ts.vel-ts .vel-tickable {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 1px 4px;
+  margin: 0 -4px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--vel-ink);
+  transition: opacity 0.15s, background-color 0.15s;
+
+  &:hover {
+    background: var(--vel-panel-2);
+  }
+  &.is-done {
+    opacity: 0.45;
+  }
+}
+.vel-ts.vel-ts .vel-tick {
+  all: unset;
+  box-sizing: border-box;
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--vel-ink-3);
+  border-radius: 3px;
+  transform: translateY(2px);
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    background: var(--vel-gold);
+    border-color: var(--vel-gold);
+    box-shadow: inset 0 0 0 2px var(--vel-bg);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--vel-gold);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Scenes: the tracker ── */
+
+.vel-ts.vel-ts .vel-sec--scenes {
+  & ol {
+    counter-reset: vel-scene;
+    margin: 2px 0 8px;
+  }
+  & > p {
+    font-size: 12.5px;
+    color: var(--vel-ink-2);
+  }
+  & > p:last-child {
+    background: var(--vel-panel-2);
+    border-left: 2px solid var(--vel-warn);
+    border-radius: 2px 4px 4px 2px;
+    padding: 6px 9px;
+    margin: 6px 0 0;
+  }
+}
+.vel-ts.vel-ts .vel-scene {
+  counter-increment: vel-scene;
+  position: relative;
+  padding: 3px 8px 4px 30px;
+  margin: 0 0 1px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--vel-ink-2);
+  transition: opacity 0.15s, background-color 0.15s;
+
+  &::before {
+    content: counter(vel-scene);
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    box-sizing: border-box;
+    border: 1px solid var(--vel-gold-2);
+    border-radius: 50%;
+    color: var(--vel-gold);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    text-align: center;
+  }
+  & strong {
+    color: var(--vel-ink);
+  }
+  &:hover {
+    background: var(--vel-panel-2);
+  }
+  &.is-current {
+    background: var(--vel-gold-soft);
+    box-shadow: inset 3px 0 0 var(--vel-gold);
+  }
+  &.is-current::before {
+    background: var(--vel-gold);
+    border-color: var(--vel-gold);
+    color: var(--vel-on-gold);
+  }
+  &.is-past {
+    opacity: 0.45;
+  }
+  /* A scene that is over folds to its title; tap it to bring it back as current. */
+  &.is-past .vel-scene-rest {
+    display: none;
+  }
+}
+
+/* The map chips on a scene line: view it yourself, or show it to the table. */
+.vel-ts.vel-ts .vel-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+.vel-ts.vel-ts .vel-chip {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--vel-rule);
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.2;
+  background: var(--vel-panel);
+
+  & button {
+    all: unset;
+    cursor: pointer;
+    padding: 1px 8px 2px;
+    color: var(--vel-ink-2);
+  }
+  & button:hover {
+    background: var(--vel-panel-2);
+    color: var(--vel-ink);
+  }
+  & button:focus-visible {
+    outline: 2px solid var(--vel-gold);
+    outline-offset: -2px;
+  }
+  & .vel-chip-view::before {
+    content: '\25C8';
+    margin-right: 5px;
+    color: var(--vel-gold-2);
+  }
+  & .vel-chip-show {
+    border-left: 1px solid var(--vel-rule);
+    color: var(--vel-ink-3);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  &.is-active {
+    border-color: var(--vel-gold-2);
+  }
+  &.is-active .vel-chip-view {
+    color: var(--vel-gold);
+  }
+  &.is-arming .vel-chip-show {
+    background: var(--vel-warn);
+    color: #fff;
+  }
+  &.is-missing {
+    opacity: 0.4;
+  }
+  &.is-missing button {
+    cursor: not-allowed;
+  }
+}
+
+/* ── Names ── */
+
+.vel-ts.vel-ts .vel-sec--names li {
+  padding: 1px 0;
+  color: var(--vel-ink-3);
+}
+.vel-ts.vel-ts .vel-name {
+  color: var(--vel-ink);
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--vel-ink-3);
+
+  &:hover,
+  &:focus-visible {
+    color: var(--vel-gold);
+    border-bottom-color: var(--vel-gold);
+    outline: none;
+  }
+}
+.vel-ts.vel-ts .vel-sec--spare p {
+  font-size: 12px;
+  color: var(--vel-ink-3);
+}
+
+/* ── Pages 2 and 3: spoken. Stage directions small, the words in a box. ── */
+
+.vel-ts--recap.vel-ts--recap,
+.vel-ts--read-aloud.vel-ts--read-aloud {
+  padding: 14px 18px 16px;
+}
+.vel-ts.vel-ts .vel-beat-head {
+  font-family: var(--vel-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vel-gold);
+  border: none;
+  border-bottom: 1px solid var(--vel-rule);
+  margin: 20px 0 8px;
+  padding: 0 0 4px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+  &.is-current::after {
+    content: 'Now';
+    margin-left: 10px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--vel-gold);
+    color: var(--vel-on-gold);
+    font-family: var(--vel-ui);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    vertical-align: 1px;
+  }
+}
+.vel-ts.vel-ts .vel-stage {
+  font-size: 12.5px;
+  color: var(--vel-ink-3);
+  margin: 10px 0 5px;
+
+  & strong {
+    color: var(--vel-ink-2);
+  }
+}
+.vel-ts.vel-ts .vel-box {
+  margin: 0 0 12px;
+  padding: 10px 14px 10px 16px;
+  background: var(--vel-box);
+  border: none;
+  border-left: 3px solid var(--vel-gold-2);
+  border-radius: 3px 6px 6px 3px;
+  color: var(--vel-box-ink);
+  font-family: var(--vel-read);
+  font-size: 17px;
+  line-height: 1.5;
+  font-style: normal;
+
+  & p {
+    margin: 0 0 8px;
+  }
+  & p:last-child {
+    margin-bottom: 0;
+  }
+  & strong {
+    font-weight: 600;
+  }
+}
+.vel-ts.vel-ts [data-vel-scene].is-past {
+  opacity: 0.45;
+}
+
+/* ── The name card (lives on <body>, so it carries its own theme class) ── */
+
+.vel-card {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  gap: 10px;
+  width: 300px;
+  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
+  padding: 10px;
+  background: var(--vel-panel);
+  color: var(--vel-ink);
+  border: 1px solid var(--vel-gold-2);
+  border-radius: 8px;
+  box-shadow: var(--vel-shadow);
+  font-family: 'Vel Outfit', 'Outfit', 'Signika', system-ui, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.4;
+  pointer-events: auto;
+
+  & .vel-card-img {
+    flex: none;
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 6px;
+    border: 1px solid var(--vel-rule);
+  }
+  & .vel-card-body {
+    min-width: 0;
+  }
+  & .vel-card-name {
+    font-family: 'Vel Cinzel', 'Cinzel', Georgia, serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vel-gold);
+  }
+  & .vel-card-say {
+    font-size: 11.5px;
+    color: var(--vel-ink-3);
+    margin-bottom: 4px;
+  }
+  & .vel-card-lead {
+    color: var(--vel-ink-2);
+  }
+  & .vel-card-lead.dim {
+    color: var(--vel-ink-3);
+    font-style: italic;
+  }
+  & .vel-card-hint {
+    margin-top: 6px;
+    font-size: 10.5px;
+    color: var(--vel-ink-3);
+    letter-spacing: 0.03em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vel-ts *,
+  .vel-card {
+    transition: none !important;
+  }
+}

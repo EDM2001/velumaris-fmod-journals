@@ -1,1 +1,21 @@
-{}
+{
+  "VELJOURNALS": {
+    "Settings": {
+      "NewLook": {
+        "Name": "Velumaris journals: use the new look",
+        "Hint": "The Table Sheet's grid, ticks, scene tracker, name cards and boxed read-aloud. Untick to see the plain pages again (for this browser only)."
+      }
+    },
+    "Notify": {
+      "Reopen": "Velumaris journals: open journal windows were redrawn. Close and reopen the GM Screen drawer to redraw it too.",
+      "NoNpc": "No NPC page called {name}."
+    },
+    "GmScreen": {
+      "Title": "GM Screen",
+      "Body": "Your GM Screen still shows <strong>{from}</strong>. Point it at <strong>{to}</strong>?",
+      "Yes": "Point it",
+      "No": "Not now",
+      "Done": "GM Screen now shows {to} ({n} cell(s) repointed)."
+    }
+  }
+}

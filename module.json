@@ -1,8 +1,8 @@
 {
   "id": "velumaris-fmod-journals",
   "title": "Velumaris: Journals",
-  "description": "An advanced journal system for Foundry VTT that mimics Obsidian-style linked notes, backlinks, and rich document editing for the Velumaris campaign setting.",
-  "version": "0.1.0",
+  "description": "The Velumaris journals at the table: the session Table Sheet as a working sheet (party grid, tickable secrets, a scene tracker, name cards, map chips, boxed read-aloud) in the Velumaris house look, following Foundry's light or dark theme. GM-only pages; nothing changes for players.",
+  "version": "0.2.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14"
@@ -26,6 +26,15 @@
       "path": "languages/en.json"
     }
   ],
+  "relationships": {
+    "recommends": [
+      {
+        "id": "gm-screen",
+        "type": "module",
+        "reason": "The Table Sheet lives in the GM Screen drawer; this module offers to repoint the drawer when a new session's sheet is pushed."
+      }
+    ]
+  },
   "url": "https://github.com/EDM2001/velumaris-fmod-journals",
   "manifest": "https://github.com/EDM2001/velumaris-fmod-journals/releases/latest/download/module.json",
   "download": "https://github.com/EDM2001/velumaris-fmod-journals/releases/latest/download/velumaris-fmod-journals.zip"
