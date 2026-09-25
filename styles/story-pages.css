@@ -1,0 +1,827 @@
+/*
+ * Velumaris: Journals, the story pages (P2, look A; DM rulings 2026-09-25).
+ *
+ * NPC, session, place and faction pages from the compendium module, in the
+ * archives' ornate frame and arc colours, in the Table Sheet's type and tokens
+ * (journals.css defines .vel-dark / .vel-light and the bundled fonts, and loads
+ * first). Every rule is scoped to classes scripts/story-pages.mjs adds, so with the
+ * module off, or its "story pages" setting unticked, not one journal changes.
+ *
+ * dnd5e's journal rules are unlayered and reach (0,3,1)
+ * (`.sheet.dnd5e2-journal .journal-entry-content h1`), so the scope here is four
+ * classes deep. Foundry core's are in cascade layers and lose to anything here.
+ */
+
+.vel-dark {
+  --vel-ok: #86d1a4;
+  --vel-secret: #f0997b;
+}
+.vel-light {
+  --vel-ok: #2d6a44;
+  --vel-secret: #a3352a;
+}
+
+.vel-sp.vel-sp.vel-sp.vel-sp {
+  --vel-display: 'Vel Cinzel', 'Cinzel', Georgia, serif;
+  --vel-ui: 'Vel Outfit', 'Outfit', 'Signika', system-ui, sans-serif;
+  --vel-read: 'Vel Garamond', 'EB Garamond', Georgia, serif;
+  --vel-accent: var(--vel-gold);
+  --vel-accent-soft: color-mix(in srgb, var(--vel-accent) 16%, transparent);
+  container-type: inline-size;
+  background: var(--vel-bg);
+  color: var(--vel-ink);
+  font-family: var(--vel-read);
+  font-size: 16px;
+  line-height: 1.55;
+  padding: 14px 18px 24px;
+  border-radius: 6px;
+  text-shadow: none;
+
+  & [hidden] {
+    display: none !important;
+  }
+
+  /* ── Type ── */
+  & p {
+    margin: 0 0 10px;
+  }
+  & strong {
+    font-weight: 600;
+    color: var(--vel-ink);
+  }
+  & h1,
+  & h2,
+  & h3,
+  & h4,
+  & h5,
+  & h6 {
+    text-shadow: none;
+    scroll-margin-top: 8px;
+    text-wrap: balance;
+  }
+  & h1 {
+    font-family: var(--vel-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--vel-ink);
+    border: none;
+    margin: 0 0 10px;
+  }
+  & h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--vel-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--vel-accent);
+    border: none;
+    border-bottom: 1px solid var(--vel-rule);
+    margin: 24px 0 10px;
+    padding: 0 0 5px;
+    line-height: 1.3;
+  }
+  & h2::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+    transform: rotate(45deg);
+    opacity: 0.85;
+  }
+  & h3 {
+    font-family: var(--vel-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--vel-ink);
+    border: none;
+    margin: 18px 0 6px;
+    padding: 0;
+    line-height: 1.3;
+  }
+  & h4,
+  & h5,
+  & h6 {
+    font-family: var(--vel-ui);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vel-ink-2);
+    border: none;
+    margin: 14px 0 6px;
+  }
+  & ul,
+  & ol {
+    margin: 0 0 10px;
+    padding: 0 0 0 1.3em;
+  }
+  & li {
+    margin: 0 0 4px;
+  }
+  & li::marker {
+    color: var(--vel-accent);
+  }
+  & hr {
+    border: none;
+    border-top: 1px solid var(--vel-rule);
+    margin: 18px 0;
+  }
+  & img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: none;
+  }
+  & code {
+    font-size: 0.85em;
+    background: var(--vel-panel-2);
+    border: 1px solid var(--vel-rule);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  & blockquote {
+    margin: 0 0 12px;
+    padding: 8px 14px;
+    border: none;
+    border-left: 2px solid var(--vel-accent);
+    background: var(--vel-panel);
+    border-radius: 0 6px 6px 0;
+    color: var(--vel-ink-2);
+  }
+  & blockquote > :last-child {
+    margin-bottom: 0;
+  }
+  & table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 12px;
+    background: transparent;
+    border: 1px solid var(--vel-rule);
+    border-radius: 0;
+    font-family: var(--vel-ui);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  & table thead {
+    background: var(--vel-panel-2);
+    color: var(--vel-ink);
+    text-shadow: none;
+  }
+  & table tr:nth-child(n) {
+    background: transparent;
+  }
+  & table tbody tr:nth-child(even) {
+    background: var(--vel-panel);
+  }
+  & table th,
+  & table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--vel-rule-soft);
+    text-align: left;
+    vertical-align: top;
+  }
+  & table th {
+    font-weight: 600;
+  }
+
+  /* ── Links ── */
+  & a.content-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--vel-accent);
+    text-decoration: underline dotted;
+    text-decoration-color: color-mix(in srgb, var(--vel-accent) 60%, transparent);
+    text-underline-offset: 3px;
+    word-break: normal;
+    text-shadow: none;
+  }
+  & a.content-link:hover {
+    text-decoration-style: solid;
+  }
+  & a.content-link[data-type^='Journal'] > i {
+    display: none;
+  }
+  & a.content-link > i {
+    color: inherit;
+    opacity: 0.7;
+    margin-right: 3px;
+  }
+
+  /* ── The header card ── */
+  & .vel-head {
+    --of: 56px;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: start;
+    margin: 0 0 12px;
+    padding: 24px 30px 22px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--vel-accent) 11%, var(--vel-panel)) 0%, var(--vel-panel) 62%);
+    box-shadow: 0 1px 0 var(--vel-rule-soft), 0 10px 28px -18px rgba(0, 0, 0, 0.55);
+  }
+  & .vel-head--session {
+    grid-template-columns: 1fr auto;
+  }
+  & .vel-head > :not(.vel-of) {
+    position: relative;
+    z-index: 1;
+  }
+  & .vel-head-body {
+    min-width: 0;
+    font-family: var(--vel-ui);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  & .vel-head-img {
+    width: 112px;
+    height: 112px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--vel-accent) 45%, var(--vel-rule));
+    box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.6);
+  }
+  & .vel-head-img--place {
+    width: 150px;
+    height: 112px;
+    object-position: center;
+  }
+  & .vel-head-cover {
+    width: 124px;
+    aspect-ratio: 7 / 9;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--vel-accent) 45%, var(--vel-rule));
+    box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.7);
+  }
+  & .vel-head-kicker {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--vel-accent);
+    margin: 0 0 2px;
+  }
+  & .vel-head-name {
+    font-family: var(--vel-display);
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--vel-ink);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+  }
+  & .vel-say {
+    font-family: var(--vel-ui);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--vel-ink-2);
+    border: 1px solid var(--vel-rule);
+    border-radius: 999px;
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
+  & .vel-head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 7px;
+    margin: 6px 0 0;
+    color: var(--vel-ink-2);
+  }
+  & .vel-head-meta a.content-link {
+    text-decoration: none;
+    font-weight: 500;
+  }
+  & .vel-sep {
+    color: var(--vel-ink-3);
+  }
+  & .vel-pron,
+  & .vel-status {
+    font-size: 11.5px;
+    border-radius: 999px;
+    padding: 0 8px;
+    border: 1px solid var(--vel-rule);
+    color: var(--vel-ink-2);
+    white-space: nowrap;
+  }
+  & .vel-status {
+    color: var(--vel-ok);
+    border-color: color-mix(in srgb, var(--vel-ok) 45%, transparent);
+  }
+  & .vel-status.is-dead {
+    color: var(--vel-secret);
+    border-color: color-mix(in srgb, var(--vel-secret) 45%, transparent);
+  }
+  & .vel-fact .vel-lbl {
+    margin-right: 5px;
+  }
+  & .vel-head-lead {
+    margin: 9px 0 0;
+    font-family: var(--vel-read);
+    font-size: 15.5px;
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--vel-ink-2);
+  }
+  & .vel-head-lead p {
+    margin: 0 0 4px;
+  }
+  & .vel-head-voice {
+    margin: 9px 0 0;
+    padding: 1px 0 1px 10px;
+    border-left: 2px solid var(--vel-accent);
+    font-family: var(--vel-read);
+    font-size: 15.5px;
+    line-height: 1.4;
+    color: var(--vel-ink);
+  }
+  & .vel-lbl {
+    font-family: var(--vel-ui);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--vel-ink-3);
+  }
+  & .vel-head-voice .vel-lbl {
+    display: block;
+    color: var(--vel-accent);
+    margin-bottom: 1px;
+  }
+  & .vel-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    margin: 12px 0 0;
+  }
+  & .vel-assoc {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+  }
+  & a.content-link.vel-btn,
+  & .vel-open-full {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--vel-ui);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--vel-on-gold);
+    background: var(--vel-accent);
+    border: 1px solid var(--vel-accent);
+    border-radius: 5px;
+    padding: 3px 11px;
+    text-decoration: none;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  & a.content-link.vel-btn > i {
+    display: inline;
+    opacity: 0.85;
+  }
+  & .vel-open-full {
+    color: var(--vel-accent);
+    background: transparent;
+  }
+  & a.content-link.vel-chip,
+  & .vel-chip {
+    display: inline-block;
+    font-family: var(--vel-ui);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--vel-ink-2);
+    background: var(--vel-panel-2);
+    border: 1px solid var(--vel-rule);
+    border-radius: 999px;
+    padding: 0 9px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  & a.content-link.vel-chip:hover {
+    border-color: var(--vel-accent);
+    color: var(--vel-ink);
+  }
+  & .vel-chip.is-plain {
+    border-style: dashed;
+    background: transparent;
+  }
+
+  /* Session header */
+  & .vel-badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--vel-accent);
+    background: var(--vel-accent-soft);
+    border: 1px solid color-mix(in srgb, var(--vel-accent) 40%, transparent);
+    border-radius: 999px;
+    padding: 1px 10px;
+    margin-bottom: 6px;
+  }
+  & .vel-head-num {
+    font-family: var(--vel-display);
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--vel-ink);
+  }
+  & .vel-head--session .vel-head-name {
+    font-family: var(--vel-read);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--vel-ink-2);
+    margin-top: 2px;
+  }
+  & .vel-head-dates {
+    display: grid;
+    gap: 1px;
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--vel-ink-3);
+  }
+  & .vel-fc {
+    color: var(--vel-ink-2);
+  }
+
+  /* ── The frame (the archives' OrnateFrame, sized from --of) ── */
+  & .vel-of {
+    --u: calc(var(--of) / 64);
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    color: var(--vel-accent);
+    border-radius: inherit;
+    overflow: hidden;
+  }
+  & .vel-of-c {
+    position: absolute;
+    width: var(--of);
+    height: var(--of);
+    opacity: 0.8;
+    margin: 0;
+    overflow: visible;
+  }
+  & .vel-of-tl {
+    top: 0;
+    left: 0;
+  }
+  & .vel-of-tr {
+    top: 0;
+    right: 0;
+    transform: scaleX(-1);
+  }
+  & .vel-of-bl {
+    bottom: 0;
+    left: 0;
+    transform: scaleY(-1);
+  }
+  & .vel-of-br {
+    bottom: 0;
+    right: 0;
+    transform: scale(-1, -1);
+  }
+  /* The bold rule (opacity .75) runs edge to edge between the corners, meeting the
+     corner art's own rule stubs flush; the faint hairline rides inside it. */
+  & .vel-of-e {
+    position: absolute;
+    background: currentColor;
+    opacity: 0.75;
+  }
+  & .vel-of-e::after {
+    content: '';
+    position: absolute;
+    background: currentColor;
+    opacity: 0.267;
+  }
+  & .vel-of-t,
+  & .vel-of-b {
+    left: var(--of);
+    right: var(--of);
+    height: calc(var(--u) * 2.3);
+  }
+  & .vel-of-t {
+    top: calc(var(--u) * 4.55);
+  }
+  & .vel-of-b {
+    bottom: calc(var(--u) * 4.55);
+  }
+  & .vel-of-t::after,
+  & .vel-of-b::after {
+    left: 0;
+    right: 0;
+    height: calc(var(--u) * 1.15);
+  }
+  & .vel-of-t::after {
+    top: calc(var(--u) * 4.575);
+  }
+  & .vel-of-b::after {
+    bottom: calc(var(--u) * 4.575);
+  }
+  & .vel-of-l,
+  & .vel-of-r {
+    top: var(--of);
+    bottom: var(--of);
+    width: calc(var(--u) * 2.3);
+  }
+  & .vel-of-l {
+    left: calc(var(--u) * 4.55);
+  }
+  & .vel-of-r {
+    right: calc(var(--u) * 4.55);
+  }
+  & .vel-of-l::after,
+  & .vel-of-r::after {
+    top: 0;
+    bottom: 0;
+    width: calc(var(--u) * 1.15);
+  }
+  & .vel-of-l::after {
+    left: calc(var(--u) * 4.575);
+  }
+  & .vel-of-r::after {
+    right: calc(var(--u) * 4.575);
+  }
+
+  /* ── Jump links, beats, cast ── */
+  & .vel-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0 0 14px;
+  }
+  & .vel-jump-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    font-family: var(--vel-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--vel-ink-2);
+    background: var(--vel-panel);
+    border: 1px solid var(--vel-rule);
+    border-radius: 999px;
+    padding: 1px 10px;
+    cursor: pointer;
+    box-shadow: none;
+    text-shadow: none;
+  }
+  & .vel-jump-link:hover {
+    border-color: var(--vel-accent);
+    color: var(--vel-ink);
+  }
+  & .vel-jump-link.is-known {
+    color: var(--vel-accent);
+    border-color: color-mix(in srgb, var(--vel-accent) 45%, var(--vel-rule));
+  }
+  & .vel-jump-link.is-secret {
+    color: var(--vel-secret);
+    border-color: color-mix(in srgb, var(--vel-secret) 45%, var(--vel-rule));
+  }
+  & .vel-jump-n {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--vel-accent);
+    font-variant-numeric: tabular-nums;
+  }
+  & .vel-cast {
+    display: grid;
+    gap: 5px;
+    margin: -4px 0 16px;
+  }
+  & .vel-cast-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+  }
+  & .vel-cast-row > .vel-lbl {
+    width: 62px;
+    flex: none;
+  }
+
+  /* ── "What Players Know" (card 4) ── */
+  & .vel-known {
+    margin: 4px 0 16px;
+    padding: 10px 16px 4px;
+    border: 1px solid color-mix(in srgb, var(--vel-accent) 42%, var(--vel-rule));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--vel-accent) 7%, var(--vel-panel));
+    scroll-margin-top: 8px;
+  }
+  & .vel-known-tag {
+    font-family: var(--vel-ui);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--vel-accent);
+    margin-bottom: 6px;
+  }
+  & .vel-known > h2.vel-known-h {
+    display: none;
+  }
+
+  /* ── DM-only sections (card 7) ── */
+  & section.secret.vel-secret {
+    margin: 22px 0 14px;
+    padding: 10px 16px 6px;
+    border: 1px solid color-mix(in srgb, var(--vel-secret) 40%, var(--vel-rule));
+    border-left: 4px solid var(--vel-secret);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--vel-secret) 6%, var(--vel-bg));
+    box-shadow: none;
+  }
+  & .vel-secret-tag {
+    font-family: var(--vel-ui);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--vel-secret);
+  }
+  & section.secret.vel-secret h2 {
+    color: var(--vel-secret);
+    margin-top: 6px;
+    border-bottom-color: color-mix(in srgb, var(--vel-secret) 30%, var(--vel-rule));
+  }
+
+  /* ── Upkeep notes (card 8) ── */
+  & .vel-upkeep {
+    margin: -4px 0 10px;
+    font-family: var(--vel-ui);
+  }
+  & .vel-upkeep > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--vel-ink-3);
+    border: 1px dashed var(--vel-rule);
+    border-radius: 999px;
+    padding: 0 9px;
+  }
+  & .vel-upkeep > summary::-webkit-details-marker {
+    display: none;
+  }
+  & .vel-upkeep > summary::before {
+    content: '›';
+    font-size: 13px;
+    line-height: 1;
+    transition: transform 0.15s;
+  }
+  & .vel-upkeep[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  & .vel-upkeep-date {
+    opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+  }
+  & .vel-upkeep > p {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--vel-ink-3);
+  }
+  & .vel-datetag {
+    font-family: var(--vel-ui);
+    font-size: 0.72em;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--vel-ink-3);
+    opacity: 0.8;
+  }
+
+  /* ── Back (same-window links) ── */
+  & .vel-back {
+    display: inline-flex;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    margin: 0 0 8px;
+    font-family: var(--vel-ui);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--vel-ink-2);
+    background: var(--vel-panel-2);
+    border: 1px solid var(--vel-rule);
+    border-radius: 999px;
+    padding: 1px 12px;
+    cursor: pointer;
+    box-shadow: none;
+  }
+  & .vel-back:hover {
+    color: var(--vel-ink);
+    border-color: var(--vel-accent);
+  }
+
+  /* ── Session prose: the reading column ── */
+  &.vel-sp--session > p,
+  &.vel-sp--session > blockquote,
+  &.vel-sp--session > ul,
+  &.vel-sp--session > ol,
+  &.vel-sp--session > h3 {
+    max-width: 68ch;
+  }
+  &.vel-sp--session {
+    font-size: 16.5px;
+    line-height: 1.6;
+  }
+  &.vel-sp--session > h3 {
+    color: var(--vel-accent);
+    font-size: 16px;
+    margin-top: 26px;
+  }
+
+  /* ── In a GM Screen cell ── */
+  &.vel-sp--cell {
+    padding: 8px 10px 12px;
+    font-size: 15px;
+  }
+  &.vel-sp--cell .vel-head {
+    --of: 42px;
+    padding: 16px 18px 14px;
+    gap: 12px;
+  }
+  &.vel-sp--compact {
+    padding: 6px;
+  }
+  &.vel-sp--compact > :not(.vel-head):not(.vel-back) {
+    display: none !important;
+  }
+  &.vel-sp--compact .vel-head {
+    margin: 0;
+  }
+  &.vel-sp--compact .vel-head-img {
+    width: 76px;
+    height: 76px;
+  }
+  &.vel-sp--compact .vel-head-name {
+    font-size: 20px;
+  }
+
+  /* ── Narrow: stack the header ── */
+  @container (max-width: 470px) {
+    & .vel-head,
+    & .vel-head--session {
+      grid-template-columns: 1fr;
+    }
+    & .vel-head-img {
+      width: 84px;
+      height: 84px;
+    }
+    & .vel-head-img--place {
+      width: 100%;
+      height: 120px;
+    }
+    & .vel-head-cover {
+      width: 100%;
+      max-height: 180px;
+      aspect-ratio: auto;
+      object-position: center 30%;
+      order: -1;
+    }
+    & .vel-head-name {
+      font-size: 21px;
+    }
+  }
+  &.vel-sp--compact .vel-head {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vel-sp .vel-upkeep > summary::before {
+    transition: none;
+  }
+}

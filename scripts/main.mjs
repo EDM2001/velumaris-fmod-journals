@@ -1,13 +1,14 @@
 /**
  * Velumaris: Journals, the Foundry side.
  *
- * table-sheet.mjs does the building and never touches Foundry; this file gives it
- * an `env` made of Foundry calls, watches the DOM for pushed pages (journal windows
- * and GM Screen cells alike), and keeps the GM Screen pointed at the newest sheet
- * on the DM's say-so.
+ * table-sheet.mjs and story-pages.mjs do the building and never touch Foundry;
+ * this file gives them an `env` made of Foundry calls, watches the DOM for pages
+ * (journal windows and GM Screen cells alike), and keeps the GM Screen pointed at
+ * the newest sheet, and its NPCs tab filled with the night's cast, on the DM's say-so.
  */
 
 import { WRAPPER_SELECTOR, enhance, refreshEntry, npcLeadFromHtml } from './table-sheet.mjs';
+import { enhanceStory, previewFromHtml, kindOfType, typeLabel } from './story-pages.mjs';
 
 const MODULE_ID = 'velumaris-fmod-journals';
 const TABLE_SHEETS_FOLDER = 'Table Sheets';
@@ -22,8 +23,25 @@ Hooks.once('init', () => {
     default: true,
     onChange: () => rerenderJournals(),
   });
-  // The GM Screen question is asked once per new sheet, not on every reload.
+  // The story pages have their own switch, so a problem with an NPC page
+  // mid-session never costs the Table Sheet (P2 round 1, assumption a07).
+  game.settings.register(MODULE_ID, 'storyLook', {
+    name: 'VELJOURNALS.Settings.StoryLook.Name',
+    hint: 'VELJOURNALS.Settings.StoryLook.Hint',
+    scope: 'client',
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: () => rerenderJournals(),
+  });
+  // The GM Screen questions are asked once per new sheet, not on every reload.
   game.settings.register(MODULE_ID, 'gmScreenAsked', {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: '',
+  });
+  game.settings.register(MODULE_ID, 'gmScreenNpcsAsked', {
     scope: 'client',
     config: false,
     type: String,
@@ -32,9 +50,11 @@ Hooks.once('init', () => {
 });
 
 Hooks.once('ready', () => {
-  // Table Sheets are GM-only entries, so there is nothing here for a player.
+  // Table Sheets are GM-only entries, and so is every story page (both compendium
+  // packs are closed to players), so there is nothing here for a player.
   if (!game.user.isGM) return;
   const env = foundryEnv();
+  const storyEnv = foundryStoryEnv();
 
   const scan = (root) => {
     if (!game.settings.get(MODULE_ID, 'newLook')) return;
@@ -52,14 +72,49 @@ Hooks.once('ready', () => {
     }
   };
 
+  const scanStory = (root) => {
+    if (!game.settings.get(MODULE_ID, 'storyLook')) return;
+    const found = [];
+    if (root.matches && root.matches('.journal-page-content')) found.push(root);
+    if (root.querySelectorAll) found.push(...root.querySelectorAll('.journal-page-content'));
+    for (const content of found) {
+      if (content.dataset.velStory) continue;
+      if (content.closest('.ProseMirror, prose-mirror, [contenteditable="true"]')) continue;
+      if (content.querySelector(WRAPPER_SELECTOR)) continue;
+      let meta = null;
+      try {
+        meta = storyMeta(content);
+      } catch (err) {
+        console.error(`${MODULE_ID} | could not read a story page`, err);
+      }
+      if (!meta) continue;
+      try {
+        enhanceStory(content, meta, storyEnv);
+      } catch (err) {
+        console.error(`${MODULE_ID} | could not build a story page`, err);
+      }
+    }
+  };
+
   new MutationObserver((mutations) => {
-    for (const m of mutations) for (const n of m.addedNodes) if (n.nodeType === 1) scan(n);
+    for (const m of mutations) {
+      for (const n of m.addedNodes) {
+        if (n.nodeType !== 1) continue;
+        scan(n);
+        scanStory(n);
+      }
+    }
   }).observe(document.body, { childList: true, subtree: true });
   scan(document.body);
+  scanStory(document.body);
 
   // A tick made in another window or on another GM client.
   Hooks.on('updateJournalEntry', (entry, change) => {
     if (change && change.flags && change.flags[MODULE_ID]) refreshEntry(entry.id, env);
+  });
+  // A closed window forgets where it came from.
+  Hooks.on('closeJournalEntrySheet', (app) => {
+    if (app && app.document) trail.delete(app.document.uuid);
   });
 
   checkGmScreen();
@@ -80,6 +135,23 @@ function rerenderJournals() {
   ui.notifications.info(game.i18n.localize('VELJOURNALS.Notify.Reopen'));
 }
 
+function velumarisPack(name) {
+  return (
+    game.packs.find(
+      (p) =>
+        p.documentName === 'JournalEntry' &&
+        String(p.metadata.packageName || '').startsWith('velumaris-fmod-compendium') &&
+        p.metadata.name === name
+    ) || null
+  );
+}
+
+function themeOf(node) {
+  const themed = node.closest('.theme-light, .theme-dark');
+  if (themed) return themed.classList.contains('theme-light') ? 'light' : 'dark';
+  return document.body.classList.contains('theme-light') ? 'light' : 'dark';
+}
+
 // ── env: everything table-sheet.mjs needs from Foundry ─────────────────────
 
 function foundryEnv() {
@@ -88,13 +160,7 @@ function foundryEnv() {
 
   const npcPack = () => {
     if (pack !== undefined) return pack;
-    pack =
-      game.packs.find(
-        (p) =>
-          p.documentName === 'JournalEntry' &&
-          String(p.metadata.packageName || '').startsWith('velumaris-fmod-compendium') &&
-          p.metadata.name === 'journals'
-      ) || null;
+    pack = velumarisPack('journals');
     return pack;
   };
 
@@ -110,11 +176,7 @@ function foundryEnv() {
   };
 
   const env = {
-    theme(node) {
-      const themed = node.closest('.theme-light, .theme-dark');
-      if (themed) return themed.classList.contains('theme-light') ? 'light' : 'dark';
-      return document.body.classList.contains('theme-light') ? 'light' : 'dark';
-    },
+    theme: themeOf,
 
     getState(entryId) {
       const entry = game.journal.get(entryId);
@@ -169,6 +231,174 @@ function foundryEnv() {
   return env;
 }
 
+// ── The story pages (P2): which page is this, and the env story-pages.mjs needs ──
+
+/** The page a rendered `.journal-page-content` belongs to, found through its app. */
+function resolvePage(content) {
+  const article = content.closest('.journal-entry-page[data-page-id]');
+  for (let el = content.parentElement; el && el !== document.body; el = el.parentElement) {
+    if (!el.id) continue;
+    const app = foundry.applications.instances.get(el.id);
+    const doc = app && app.document;
+    if (!doc) continue;
+    if (doc.documentName === 'JournalEntryPage') return doc;
+    if (doc.documentName === 'JournalEntry') return article ? doc.pages.get(article.dataset.pageId) || null : null;
+  }
+  return null;
+}
+
+/** What story-pages.mjs is told about a page, from the tags pack-writers.js stamps. */
+function storyMeta(content) {
+  const page = resolvePage(content);
+  if (!page || page.type !== 'text') return null;
+  const entry = page.parent;
+  const ev = (entry && entry.flags && entry.flags.velumaris) || {};
+  const pv = (page.flags && page.flags.velumaris) || {};
+  if (ev.kind === 'table-sheet') return null;
+  const isSession = ev.type === 'arc' && pv.session != null;
+  if (!ev.type && !isSession) return null;
+  const kind = kindOfType(ev.type, isSession);
+  let arc = null;
+  if (isSession) {
+    const m = /^Arc\s+(\d+)\s*-\s*(.+)$/.exec(entry.name || '');
+    if (m) arc = { n: Number(m[1]), name: m[2].trim() };
+  }
+  const cell = content.closest('.gm-screen-grid-cell');
+  return {
+    kind,
+    type: ev.type || '',
+    name: entry.name,
+    uuid: isSession ? page.uuid : entry.uuid,
+    arc,
+    session: isSession ? Number(pv.session) : null,
+    pronouns: ev.pronouns || '',
+    pronunciation: ev.pronunciation || '',
+    cast: pv.cast || null,
+    inCell: !!cell,
+    compact: !!cell && kind === 'npc',
+  };
+}
+
+/** entry uuid -> the uuids a same-window link came through, for Back. Memory only. */
+const trail = new Map();
+
+function hostApp(root) {
+  for (let el = root.parentElement; el && el !== document.body; el = el.parentElement) {
+    if (!el.id || !el.classList.contains('application')) continue;
+    const app = foundry.applications.instances.get(el.id);
+    if (app && app.document && app.document.documentName === 'JournalEntry') return app;
+  }
+  return null;
+}
+
+/** Open `uuid` in the window `app` occupies: same place, same size; the old one closes. */
+async function openHere(app, uuid, isBack) {
+  let doc = null;
+  try {
+    doc = await fromUuid(uuid);
+  } catch {
+    doc = null;
+  }
+  if (!doc) {
+    ui.notifications.warn(game.i18n.localize('VELJOURNALS.Notify.NoPage'));
+    return;
+  }
+  const entry = doc.documentName === 'JournalEntryPage' ? doc.parent : doc;
+  if (!entry || entry.documentName !== 'JournalEntry') {
+    if (doc.sheet) doc.sheet.render(true);
+    return;
+  }
+  const here = app.document;
+  const past = trail.get(here.uuid) || [];
+  trail.set(entry.uuid, isBack ? past.slice(0, -1) : [...past, here.uuid]);
+  const { left, top, width, height } = app.position;
+  const opts = { force: true, position: { left, top, width, height } };
+  if (doc.documentName === 'JournalEntryPage') opts.pageId = doc.id;
+  await entry.sheet.render(opts);
+  if (entry.sheet !== app) await app.close({ animate: false });
+}
+
+function foundryStoryEnv() {
+  const previews = new Map();
+
+  const indexEntry = async (uuid) => {
+    const parsed = foundry.utils.parseUuid(uuid);
+    if (!parsed || !parsed.collection) return null;
+    const id = parsed.primaryId || parsed.documentId;
+    if (typeof parsed.collection.getIndex === 'function') {
+      const index = await parsed.collection.getIndex({ fields: ['flags.velumaris'] });
+      return { entry: index.get(id), embedded: !!(parsed.embedded && parsed.embedded.length) };
+    }
+    return { entry: parsed.collection.get(id), embedded: !!(parsed.embedded && parsed.embedded.length) };
+  };
+
+  return {
+    theme: themeOf,
+
+    async kindOf(uuid) {
+      const hit = await indexEntry(uuid);
+      if (!hit || !hit.entry || hit.embedded) return null;
+      const type = hit.entry.flags && hit.entry.flags.velumaris ? hit.entry.flags.velumaris.type : '';
+      return { kind: kindOfType(type, false), name: hit.entry.name };
+    },
+
+    preview(uuid) {
+      if (previews.has(uuid)) return previews.get(uuid);
+      const job = (async () => {
+        const doc = await fromUuid(uuid);
+        if (!doc) return null;
+        if (doc.documentName === 'JournalEntryPage') {
+          const f = (doc.flags && doc.flags.velumaris) || {};
+          const info = previewFromHtml(doc.text ? doc.text.content : '');
+          const arc = doc.parent ? String(doc.parent.name).replace(/\s*-\s*/, ' · ') : '';
+          return { name: doc.name.replace(/^Session\s+\d+\s*-\s*/, ''), img: info.img, lead: info.lead, kicker: f.session ? `Session ${f.session}${arc ? ` · ${arc}` : ''}` : arc };
+        }
+        if (doc.documentName !== 'JournalEntry') return null;
+        const f = (doc.flags && doc.flags.velumaris) || {};
+        const page = doc.pages.contents[0];
+        const info = previewFromHtml(page && page.text ? page.text.content : '');
+        const bits = [];
+        bits.push(typeLabel(f.type));
+        if (f.pronunciation) bits.push(String(f.pronunciation).replace(/\s*\[TODO[^\]]*\]\s*/i, '?'));
+        if (f.pronouns) bits.push(String(f.pronouns).toLowerCase());
+        return { name: doc.name, img: info.img, lead: info.lead, kicker: bits.join(' · ') };
+      })().catch(() => null);
+      previews.set(uuid, job);
+      return job;
+    },
+
+    openInPlace(uuid, root) {
+      const app = hostApp(root);
+      if (!app) return false;
+      const here = app.document;
+      // A page of the same entry (the next session in an arc): Foundry turns the page.
+      if (uuid === here.uuid || uuid.startsWith(`${here.uuid}.`)) return false;
+      openHere(app, uuid, false);
+      return true;
+    },
+
+    back(root) {
+      const app = hostApp(root);
+      if (!app) return null;
+      const stack = trail.get(app.document.uuid);
+      if (!stack || !stack.length) return null;
+      const prev = stack[stack.length - 1];
+      let label = 'Back';
+      try {
+        const d = fromUuidSync(prev);
+        if (d && d.name) label = d.name;
+      } catch {
+        /* the label is a nicety */
+      }
+      return { label, go: () => openHere(app, prev, true) };
+    },
+
+    openUuid(uuid) {
+      fromUuid(uuid).then((d) => d && d.sheet && d.sheet.render(true));
+    },
+  };
+}
+
 // ── The GM Screen follows the newest sheet, when the DM says so ─────────────
 
 /**
@@ -186,14 +416,22 @@ async function checkGmScreen() {
   const sheets = folder.contents.filter(isTableSheet);
   if (!sheets.length) return;
   const newest = sheets.sort((a, b) => (b.flags.velumaris.session || 0) - (a.flags.velumaris.session || 0))[0];
-  if (game.settings.get(MODULE_ID, 'gmScreenAsked') === newest.id) return;
+  await offerRepoint(newest);
+  await offerNpcTab(newest);
+}
 
-  let config;
+function gmScreenConfig() {
   try {
-    config = game.settings.get('gm-screen', 'gm-screen-config');
+    return game.settings.get('gm-screen', 'gm-screen-config');
   } catch {
-    return;
+    return null;
   }
+}
+
+async function offerRepoint(newest) {
+  if (game.settings.get(MODULE_ID, 'gmScreenAsked') === newest.id) return;
+  const config = gmScreenConfig();
+  if (!config) return;
   const stale = [];
   for (const [gridId, grid] of Object.entries(config.grids || {})) {
     for (const [cellId, cell] of Object.entries(grid.entries || {})) {
@@ -225,4 +463,56 @@ async function checkGmScreen() {
   }
   await game.settings.set('gm-screen', 'gm-screen-config', next);
   ui.notifications.info(game.i18n.format('VELJOURNALS.GmScreen.Done', { to: newest.name, n: stale.length }));
+}
+
+/**
+ * The NPCs tab, filled from the night's cast (P2 round 1, card 9). `table-sheet.js`
+ * stamps the Session Guide's "Important NPCs" on the sheet as `flags.velumaris.cast`;
+ * this offers, once per sheet, to put each of them in a cell of the tab called
+ * "NPCs" (the compendium page, which the module then shows as a compact card).
+ */
+async function offerNpcTab(newest) {
+  const cast = newest.flags.velumaris.cast;
+  if (!Array.isArray(cast) || !cast.length) return;
+  if (game.settings.get(MODULE_ID, 'gmScreenNpcsAsked') === newest.id) return;
+  const config = gmScreenConfig();
+  if (!config) return;
+  const [gridId, grid] = Object.entries(config.grids || {}).find(([, g]) => /^npcs?$/i.test(String(g.name || '').trim())) || [];
+  if (!grid) return;
+  const pack = velumarisPack('journals');
+  if (!pack) return;
+  const index = await pack.getIndex({ fields: ['flags.velumaris'] });
+  const picks = [];
+  for (const name of cast) {
+    const hit = index.find((e) => e.name === name && e.flags && e.flags.velumaris && e.flags.velumaris.type === 'npc');
+    if (hit) picks.push({ name, uuid: `Compendium.${pack.collection}.JournalEntry.${hit._id}` });
+  }
+  if (!picks.length) return;
+  const now = Object.values(grid.entries || {}).map((c) => c.entityUuid).filter(Boolean);
+  if (now.length === picks.length && picks.every((p) => now.includes(p.uuid))) return;
+
+  await game.settings.set(MODULE_ID, 'gmScreenNpcsAsked', newest.id);
+  const ok = await foundry.applications.api.DialogV2.confirm({
+    window: { title: game.i18n.localize('VELJOURNALS.GmScreen.Title') },
+    content: `<p>${game.i18n.format('VELJOURNALS.GmScreen.NpcBody', { names: picks.map((p) => foundry.utils.escapeHTML(p.name)).join(' · ') })}</p>`,
+    yes: { label: game.i18n.localize('VELJOURNALS.GmScreen.NpcYes') },
+    no: { label: game.i18n.localize('VELJOURNALS.GmScreen.No') },
+  });
+  if (!ok) return;
+
+  const cols = Math.min(3, picks.length);
+  const rows = Math.ceil(picks.length / cols);
+  const entries = {};
+  picks.forEach((p, i) => {
+    const x = (i % cols) + 1;
+    const y = Math.floor(i / cols) + 1;
+    const entryId = `${x}-${y}`;
+    entries[entryId] = { x, y, entryId, entityUuid: p.uuid, type: 'JournalEntry' };
+  });
+  const next = foundry.utils.deepClone(config);
+  next.grids[gridId].entries = entries;
+  next.grids[gridId].columnOverride = cols;
+  next.grids[gridId].rowOverride = rows;
+  await game.settings.set('gm-screen', 'gm-screen-config', next);
+  ui.notifications.info(game.i18n.format('VELJOURNALS.GmScreen.NpcDone', { n: picks.length }));
 }

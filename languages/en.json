@@ -4,18 +4,26 @@
       "NewLook": {
         "Name": "Velumaris journals: use the new look",
         "Hint": "The Table Sheet's grid, ticks, scene tracker, name cards and boxed read-aloud. Untick to see the plain pages again (for this browser only)."
+      },
+      "StoryLook": {
+        "Name": "Velumaris journals: the story pages' new look",
+        "Hint": "NPC, session, place and faction pages from the compendium: header cards in the ornate frame, previews on links, links that open in the same window, jump links. Untick to see the plain pages again (for this browser only). The Table Sheet has its own switch above."
       }
     },
     "Notify": {
       "Reopen": "Velumaris journals: open journal windows were redrawn. Close and reopen the GM Screen drawer to redraw it too.",
-      "NoNpc": "No NPC page called {name}."
+      "NoNpc": "No NPC page called {name}.",
+      "NoPage": "That page is not in this world or the compendium."
     },
     "GmScreen": {
       "Title": "GM Screen",
       "Body": "Your GM Screen still shows <strong>{from}</strong>. Point it at <strong>{to}</strong>?",
       "Yes": "Point it",
       "No": "Not now",
-      "Done": "GM Screen now shows {to} ({n} cell(s) repointed)."
+      "Done": "GM Screen now shows {to} ({n} cell(s) repointed).",
+      "NpcBody": "Fill the GM Screen's <strong>NPCs</strong> tab with tonight's cast from the Session Guide?<br><br>{names}",
+      "NpcYes": "Fill it",
+      "NpcDone": "The NPCs tab now holds {n} NPC(s)."
     }
   }
 }

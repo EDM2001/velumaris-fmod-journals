@@ -1,0 +1,591 @@
+<title>Story Pages Mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Outfit:wght@400;500;600&display=swap">
+<!--
+  Review mock for velumaris-fmod-journals P2 (the story pages). Built by
+  dev/story-pages/build-mock.js: the real pages as Foundry renders them, the
+  module's own CSS and core scripts, dnd5e's own journal rules, and a fake env in
+  place of Foundry. dev/ is never deployed.
+-->
+<style>
+  :root {
+    --ground: #e9ecf1;
+    --panel: #ffffff;
+    --ink: #151b27;
+    --ink-2: #445066;
+    --ink-3: #6b7588;
+    --rule: #d3d9e2;
+    --gold: #8a5a0e;
+    --gold-soft: #f5ecd9;
+    --ok: #2d6a44;
+    --warn: #8a5a00;
+    --win-bg: #2b2b30;
+    --win-head: #1c1c20;
+    --win-ink: #e8e6e1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #05080f;
+      --panel: #0f1626;
+      --ink: #e6e9ef;
+      --ink-2: #aab3c2;
+      --ink-3: #7d8799;
+      --rule: #202b40;
+      --gold: #fac775;
+      --gold-soft: #2a2008;
+      --ok: #6cc28c;
+      --warn: #e2b04e;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #05080f;
+    --panel: #0f1626;
+    --ink: #e6e9ef;
+    --ink-2: #aab3c2;
+    --ink-3: #7d8799;
+    --rule: #202b40;
+    --gold: #fac775;
+    --gold-soft: #2a2008;
+    --ok: #6cc28c;
+    --warn: #e2b04e;
+  }
+  body { background: var(--ground); color: var(--ink); font: 400 15px/1.5 Outfit, system-ui, sans-serif; margin: 0; padding-inline: 16px; padding-block: 0 80px; }
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 18px; }
+  header.top { padding-block: 30px 4px; max-width: 780px; display: grid; gap: 8px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0; }
+  h1 { font-family: Cinzel, Georgia, serif; font-size: clamp(28px, 6vw, 40px); font-weight: 700; line-height: 1.05; margin: 0; text-wrap: balance; }
+  .lede { color: var(--ink-2); margin: 0; max-width: 70ch; }
+  .try { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 14px; display: grid; gap: 3px; }
+  .try b { color: var(--ink); font-weight: 600; }
+  h2.sec { font-family: Cinzel, Georgia, serif; font-size: 20px; margin: 10px 0 0; }
+
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--ink-3); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: var(--ground); padding-block: 10px; border-bottom: 1px solid var(--rule); }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 9px; overflow: hidden; background: var(--panel); }
+  .seg button { font: 500 13px/1 Outfit, system-ui, sans-serif; color: var(--ink-2); background: transparent; border: 0; padding: 8px 11px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--rule); }
+  .seg button[aria-pressed="true"] { background: var(--gold); color: var(--panel); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tabs button { font: 500 13.5px/1 Outfit, system-ui, sans-serif; color: var(--ink); background: var(--panel); border: 1px solid var(--rule); border-radius: 99px; padding: 8px 13px; cursor: pointer; }
+  .tabs button[aria-pressed="true"] { border-color: var(--gold); background: var(--gold-soft); }
+  button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  .stage { overflow-x: auto; padding-block: 4px 10px; }
+  .desk { background: #3a3f48 radial-gradient(circle at 30% 20%, #4a505b, #2c3038 70%); border-radius: 12px; padding: 22px; min-height: 420px; display: flex; justify-content: center; }
+  .desk.light { background: #b9b4a6 radial-gradient(circle at 30% 20%, #d6d1c3, #aaa596 70%); }
+
+  /* A Foundry-shaped journal window. Only the chrome is mocked; the page inside is
+     what Foundry renders and what the module builds on. */
+  .mock-window { width: 860px; max-width: 100%; border-radius: 6px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.45); background: var(--win-bg); display: flex; flex-direction: column; max-height: 1100px; }
+  .mock-window.w-narrow { width: 540px; }
+  .mock-window.theme-light { --win-bg: #e8e4da; --win-head: #d6d0c3; --win-ink: #1d1b17; }
+  .mock-window > .window-header { background: var(--win-head); color: var(--win-ink); display: flex; align-items: center; gap: 10px; padding: 7px 12px; font: 600 13px/1.2 Signika, Outfit, system-ui, sans-serif; }
+  .mock-window > .window-header .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mock-window > .window-header .x { opacity: .6; }
+  .mock-window .window-content { overflow-y: auto; padding: 8px; background: var(--win-bg); }
+  .mock-window .journal-entry-page { margin: 0; }
+  .tall .mock-window { max-height: none; }
+
+  .gm-drawer { width: 1120px; max-width: 100%; background: #1f2126; border-radius: 8px; padding: 10px; box-shadow: 0 16px 40px rgba(0,0,0,.45); }
+  .gm-drawer.theme-light { background: #ddd8cc; }
+  .gm-tabs { display: flex; gap: 2px; margin-bottom: 8px; font: 500 12.5px/1 Signika, Outfit, sans-serif; }
+  .gm-tabs span { padding: 7px 12px; border-radius: 5px 5px 0 0; background: rgba(255,255,255,.06); color: #cfcac0; }
+  .gm-drawer.theme-light .gm-tabs span { background: rgba(0,0,0,.06); color: #3a372f; }
+  .gm-tabs span.on { background: rgba(255,255,255,.16); color: #fff; }
+  .gm-drawer.theme-light .gm-tabs span.on { background: rgba(0,0,0,.14); color: #000; }
+  .gm-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .gm-screen-grid-cell { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); border-radius: 6px; display: flex; flex-direction: column; min-width: 0; max-height: 470px; }
+  .gm-drawer.theme-light .gm-screen-grid-cell { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.15); }
+  .gm-screen-grid-cell-header { display: flex; gap: 8px; align-items: center; padding: 4px 8px; font: 600 12px/1.3 Signika, Outfit, sans-serif; color: #cfcac0; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .gm-drawer.theme-light .gm-screen-grid-cell-header { color: #3a372f; border-color: rgba(0,0,0,.12); }
+  .gm-screen-grid-cell-content { overflow-y: auto; padding: 4px; }
+
+  .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 18px; display: grid; gap: 10px; }
+  .panel h3 { font-family: Cinzel, Georgia, serif; font-size: 17px; margin: 0; }
+  .panel p { margin: 0; color: var(--ink-2); font-size: 14px; }
+  .catches { display: grid; gap: 12px; }
+  .catch h4 { margin: 0 0 4px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .catch ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13.5px; }
+  .catch li.fold::marker { color: var(--gold); }
+  .catch .k { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-right: 6px; }
+
+  .q { display: grid; gap: 10px; }
+  .opts { display: grid; gap: 8px; }
+  .opt { text-align: left; font: inherit; color: inherit; background: var(--ground); border: 1.5px solid var(--rule); border-radius: 12px; padding: 11px 13px; display: grid; gap: 2px; cursor: pointer; }
+  .opt[aria-pressed="true"] { border-color: var(--gold); background: var(--gold-soft); }
+  .opt b { font-weight: 600; }
+  .opt span { font-size: 13.5px; color: var(--ink-2); }
+  .note { display: grid; gap: 5px; font-size: 13.5px; color: var(--ink-2); }
+  textarea { font: inherit; color: var(--ink); background: var(--ground); border: 1px solid var(--rule); border-radius: 10px; padding: 9px; min-height: 54px; resize: vertical; width: 100%; box-sizing: border-box; }
+  .status { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .status.saved { color: var(--ok); }
+  .status.err { color: var(--warn); }
+
+  .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: #151b27; color: #f1f2f5; border: 1px solid #fac775; border-radius: 10px; padding: 10px 14px; font-size: 13.5px; max-width: min(560px, calc(100vw - 32px)); z-index: 20000; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .foot { font-size: 12.5px; color: var(--ink-3); }
+  @media (max-width: 600px) {
+    .desk { padding: 8px; }
+    .gm-grid { grid-template-columns: 1fr; }
+  }
+</style>
+<style id="dnd5e-journal-rules">/*DND5E_CSS*/</style>
+<style id="module-css">/*MODULE_CSS*/</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Foundry journals · part 2 · the mock</p>
+    <h1>The story pages</h1>
+    <p class="lede">Real pages from the compendium, exactly as Foundry renders them, with the module's own stylesheet and script built on top. Only the window around them is pretend. dnd5e's own journal styles are loaded too, so what you see is what wins in Foundry. Nothing here has been deployed.</p>
+    <ul class="try">
+      <li><b>Hover a link</b> in any page for its preview card. <b>Click it</b>: Wick, Gardhu, Solder, Dolly, Tess, Muvara, Eden, Scion Guardians and Sessions 141 and 142 open right here, in the same window, with a <b>Back</b> button. Anything else shows what Foundry would do.</li>
+      <li><b>Saturday / After the next ship</b>: Saturday is what goes live now; after the ship, the NPC headers gain how to say the name and pronouns, and session headers list the cast from the note.</li>
+      <li><b>Narrow window</b> shows how a header stacks in a small window. <b>GM Screen</b> shows the NPCs tab as compact cards, filled with S144's cast.</li>
+    </ul>
+  </header>
+
+  <div class="bar" role="toolbar" aria-label="Mock controls">
+    <div class="tabs" id="tabs"></div>
+    <div class="seg" aria-label="Foundry theme"><button type="button" id="th-dark" aria-pressed="true">Dark</button><button type="button" id="th-light" aria-pressed="false">Light</button></div>
+    <div class="seg" aria-label="Data"><button type="button" id="ship-no" aria-pressed="true">Saturday</button><button type="button" id="ship-yes" aria-pressed="false">After the next ship</button></div>
+    <div class="seg" aria-label="Window width"><button type="button" id="w-wide" aria-pressed="true">Wide window</button><button type="button" id="w-narrow" aria-pressed="false">Narrow window</button></div>
+  </div>
+
+  <div class="stage"><div class="desk" id="desk"></div></div>
+
+  <section class="panel" aria-labelledby="catch-h">
+    <h3 id="catch-h">What the upkeep rule caught</h3>
+    <p>Card 8: paragraphs that are only a dated note fold to a small "Upkeep note" line, and date tags in parentheses turn small and faint. This is every match on these ten pages, so you can see nothing real is caught.</p>
+    <div class="catches" id="catches"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="notice-h">
+    <h3 id="notice-h">Noticed in the notes themselves (not changed)</h3>
+    <p>The module shows what the vault says, so these are fixes in the notes, not the look. Say the word and I'll make them.</p>
+    <ul class="try" style="color:var(--ink-2)">
+      <li><b>Gardhu has no Roleplaying text</b>, so his header has no voice line. The empty heading is hidden in Foundry.</li>
+      <li><b>Dolly's lead ends with an upkeep sentence</b> ("Created 2026-08-21; filled out 2026-09-10 from the locked Session 142 - Brain Storm…"), and the lead is what her header and every preview card show.</li>
+      <li><b>Eden's lead ends with two build notes</b> ("The playable build is running in Eden Build Brain Storm; the story it carries is in Eden Endgame (Planned).").</li>
+      <li><b>Several NPCs carry their respelling in the body</b>, like Gardhu's "(GARD-hoo)". The header already uses it before the ship, so Saturday shows how to say Gardhu, Tess and Muvara.</li>
+    </ul>
+  </section>
+
+  <section class="panel q" aria-labelledby="v-h">
+    <h3 id="v-h">Your verdict <span class="status" id="st-mock"></span></h3>
+    <div class="opts" id="opts-mock"></div>
+    <label class="note" for="note-mock">Anything to change (optional)<textarea id="note-mock" rows="3"></textarea></label>
+  </section>
+
+  <p class="foot">Pictures are downscaled copies of the ones Foundry serves. The GM Screen drawer is drawn from its real layout (three columns), with the cells holding the compendium pages the module would put there.</p>
+</div>
+
+<script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push(String(e.message)); });</script>
+<script type="application/json" id="data">/*DATA*/</script>
+<script id="mock-core">
+/*MODULE_CORE*/
+</script>
+<script id="mock-main">
+(function () {
+  var D = JSON.parse(document.getElementById('data').textContent);
+  var byKey = {};
+  D.pages.forEach(function (p) { byKey[p.key] = p; });
+  var TABS = [['Wick', 'Wick'], ['Gardhu', 'Gardhu'], ['S142', 'Session 142'], ['Eden', 'Eden'], ['Scion Guardians', 'Scion Guardians'], ['gm', 'GM Screen: NPCs']];
+  var CAST = ['Wick', 'Solder', 'Dolly', 'Tess', 'Muvara', 'Gardhu'];
+  var ui = { theme: 'dark', ship: false, width: 'wide', tab: 'Wick' };
+  var current = 'Wick';
+  var trail = {};
+
+  function toast(msg) {
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 3600);
+  }
+
+  function pageByUuid(uuid) {
+    return D.pages.filter(function (p) { return p.pageUuid ? p.pageUuid === uuid : p.entryUuid === uuid; })[0] || null;
+  }
+  function titleOf(p) {
+    return p.pageUuid ? p.pageName : p.entryName;
+  }
+
+  function metaFor(p, inCell) {
+    var ev = (p.entryFlags && p.entryFlags.velumaris) || {};
+    var pv = (p.pageFlags && p.pageFlags.velumaris) || {};
+    var isSession = ev.type === 'arc' && pv.session != null;
+    var kind = kindOfType(ev.type, isSession);
+    var arc = null;
+    if (isSession) {
+      var m = /^Arc\s+(\d+)\s*-\s*(.+)$/.exec(p.entryName);
+      if (m) arc = { n: Number(m[1]), name: m[2].trim() };
+    }
+    var sh = ui.ship ? (D.shipped.entries[p.entryName] || {}) : {};
+    return {
+      kind: kind, type: ev.type || '', name: p.entryName, uuid: isSession ? p.pageUuid : p.entryUuid, arc: arc,
+      session: isSession ? Number(pv.session) : null,
+      pronouns: sh.pronouns || '', pronunciation: sh.pronunciation || '',
+      cast: ui.ship && isSession ? (D.shipped.pages[p.key] || null) : null,
+      inCell: !!inCell, compact: !!inCell && kind === 'npc'
+    };
+  }
+
+  var env = {
+    theme: function (node) {
+      var t = node.closest('.theme-light, .theme-dark');
+      return t && t.classList.contains('theme-light') ? 'light' : 'dark';
+    },
+    kindOf: function (uuid) {
+      var d = D.docs[uuid];
+      if (!d || d.documentName !== 'JournalEntry') return Promise.resolve(null);
+      return Promise.resolve({ kind: kindOfType(d.flags && d.flags.velumaris ? d.flags.velumaris.type : '', false), name: d.name });
+    },
+    preview: function (uuid) {
+      var d = D.docs[uuid];
+      if (!d) return Promise.resolve(null);
+      if (d.documentName === 'JournalEntryPage') {
+        var info = previewFromHtml(d.head);
+        var f = (d.flags && d.flags.velumaris) || {};
+        var arc = d.parentName ? String(d.parentName).replace(/\s*-\s*/, ' · ') : '';
+        return Promise.resolve({ name: d.name.replace(/^Session\s+\d+\s*-\s*/, ''), img: info.img, lead: info.lead, kicker: f.session ? 'Session ' + f.session + (arc ? ' · ' + arc : '') : arc });
+      }
+      if (d.documentName !== 'JournalEntry') return Promise.resolve(null);
+      var fl = (d.flags && d.flags.velumaris) || {};
+      var inf = previewFromHtml(d.head);
+      var bits = [typeLabel(fl.type)];
+      var sh = ui.ship ? D.shipped.entries[d.name] : null;
+      if (sh && sh.pronunciation) bits.push(sh.pronunciation.replace(/\s*\[TODO[^\]]*\]\s*/i, '?'));
+      if (sh && sh.pronouns) bits.push(sh.pronouns.toLowerCase());
+      return Promise.resolve({ name: d.name, img: inf.img, lead: inf.lead, kicker: bits.join(' · ') });
+    },
+    openInPlace: function (uuid, root) {
+      if (!root.closest('.mock-window')) return false;
+      var here = byKey[current];
+      if (here && uuid.indexOf(here.entryUuid + '.') === 0) return false;
+      var target = pageByUuid(uuid);
+      if (target) navigate(target.key, false);
+      else {
+        var d = D.docs[uuid];
+        toast('In Foundry this opens ' + (d ? d.name : 'that page') + ' in this window, with Back. It is not one of the pages in the mock.');
+      }
+      return true;
+    },
+    back: function (root) {
+      if (!root.closest('.mock-window')) return null;
+      var stack = trail[current];
+      if (!stack || !stack.length) return null;
+      var prev = stack[stack.length - 1];
+      return { label: titleOf(byKey[prev]), go: function () { navigate(prev, true); } };
+    },
+    openUuid: function (uuid) {
+      var t = pageByUuid(uuid);
+      if (t) { selectTab(t.key); return; }
+      toast('In Foundry this opens the full page in its own window.');
+    }
+  };
+
+  // Links nothing else handled: Foundry's own behaviour, spelled out.
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest && ev.target.closest('a.content-link');
+    if (!a) return;
+    ev.preventDefault();
+    var here = byKey[current];
+    var uuid = a.dataset.uuid || '';
+    if (a.dataset.type === 'Actor') { toast('In Foundry this opens the statblock (' + a.textContent.trim() + ').'); return; }
+    if (ev.shiftKey) { toast('Shift-click: Foundry opens it in a new window, as it does today.'); return; }
+    if (a.closest('.gm-screen-grid-cell')) { toast('Inside a GM Screen cell, links open a new window as they do today.'); return; }
+    if (here && uuid.indexOf(here.entryUuid + '.') === 0) {
+      var t = pageByUuid(uuid);
+      if (t) { current = t.key; renderWindow(); }
+      else toast('In Foundry the arc journal turns to that session page.');
+    }
+  });
+
+  function navigate(key, isBack) {
+    var past = trail[current] || [];
+    trail[key] = isBack ? past.slice(0, -1) : past.concat([current]);
+    current = key;
+    renderWindow();
+  }
+
+  function pageDom(p, inCell) {
+    var art = document.createElement('article');
+    art.className = 'journal-entry-page text';
+    art.dataset.pageId = p.pageId;
+    var holder = document.createElement('div');
+    var content = document.createElement('section');
+    content.className = 'journal-page-content';
+    content.innerHTML = p.html;
+    holder.appendChild(content);
+    art.appendChild(holder);
+    return { art: art, content: content };
+  }
+
+  function renderWindow() {
+    var desk = document.getElementById('desk');
+    desk.className = 'desk' + (ui.theme === 'light' ? ' light' : '');
+    desk.innerHTML = '';
+    var p = byKey[current];
+    var win = document.createElement('div');
+    win.className = 'mock-window application sheet journal-sheet journal-entry dnd5e2-journal theme-' + ui.theme + (ui.width === 'narrow' ? ' w-narrow' : '');
+    var head = document.createElement('header');
+    head.className = 'window-header';
+    var t = document.createElement('span');
+    t.className = 't';
+    t.textContent = p.entryName;
+    head.appendChild(t);
+    var x = document.createElement('span');
+    x.className = 'x';
+    x.textContent = '×';
+    head.appendChild(x);
+    win.appendChild(head);
+    var wc = document.createElement('section');
+    wc.className = 'window-content';
+    var jc = document.createElement('section');
+    jc.className = 'journal-entry-content';
+    var pages = document.createElement('div');
+    pages.className = 'journal-entry-pages';
+    var d = pageDom(p, false);
+    pages.appendChild(d.art);
+    jc.appendChild(pages);
+    wc.appendChild(jc);
+    win.appendChild(wc);
+    desk.appendChild(win);
+    enhanceStory(d.content, metaFor(p, false), env);
+  }
+
+  function renderGm() {
+    var desk = document.getElementById('desk');
+    desk.className = 'desk' + (ui.theme === 'light' ? ' light' : '');
+    desk.innerHTML = '';
+    var drawer = document.createElement('div');
+    drawer.className = 'gm-drawer theme-' + ui.theme;
+    var tabs = document.createElement('div');
+    tabs.className = 'gm-tabs';
+    ['Quick Ref', 'Recap', 'NPCs', 'Stat Blocks', 'Treasures', 'Locations', 'Rules', 'Secrets'].forEach(function (n) {
+      var s = document.createElement('span');
+      s.textContent = n;
+      if (n === 'NPCs') s.className = 'on';
+      tabs.appendChild(s);
+    });
+    drawer.appendChild(tabs);
+    var grid = document.createElement('div');
+    grid.className = 'gm-grid';
+    CAST.forEach(function (name) {
+      var p = byKey[name];
+      if (!p) return;
+      var cell = document.createElement('div');
+      cell.className = 'gm-screen-grid-cell';
+      cell.dataset.entityUuid = p.entryUuid;
+      var h = document.createElement('div');
+      h.className = 'gm-screen-grid-cell-header';
+      h.textContent = p.entryName;
+      cell.appendChild(h);
+      var c = document.createElement('div');
+      c.className = 'gm-screen-grid-cell-content';
+      var app = document.createElement('div');
+      app.className = 'application sheet journal-sheet dnd5e2-journal theme-' + ui.theme;
+      var d = pageDom(p, true);
+      app.appendChild(d.art);
+      c.appendChild(app);
+      cell.appendChild(c);
+      grid.appendChild(cell);
+      enhanceStory(d.content, metaFor(p, true), env);
+    });
+    drawer.appendChild(grid);
+    desk.appendChild(drawer);
+  }
+
+  function render() {
+    if (ui.tab === 'gm') renderGm();
+    else renderWindow();
+  }
+
+  function selectTab(key) {
+    ui.tab = key;
+    if (key !== 'gm') {
+      current = key;
+      trail[key] = [];
+    }
+    document.querySelectorAll('#tabs button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.k === key)); });
+    render();
+  }
+
+  var tabRoot = document.getElementById('tabs');
+  TABS.forEach(function (t) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.k = t[0];
+    b.textContent = t[1];
+    b.setAttribute('aria-pressed', String(t[0] === ui.tab));
+    b.addEventListener('click', function () { selectTab(t[0]); });
+    tabRoot.appendChild(b);
+  });
+
+  function seg(a, b, key, va, vb) {
+    var A = document.getElementById(a);
+    var B = document.getElementById(b);
+    function set(v) {
+      ui[key] = v;
+      A.setAttribute('aria-pressed', String(v === va));
+      B.setAttribute('aria-pressed', String(v === vb));
+      render();
+    }
+    A.addEventListener('click', function () { set(va); });
+    B.addEventListener('click', function () { set(vb); });
+  }
+  seg('th-dark', 'th-light', 'theme', 'dark', 'light');
+  seg('ship-no', 'ship-yes', 'ship', false, true);
+  seg('w-wide', 'w-narrow', 'width', 'wide', 'narrow');
+
+  // Every upkeep match, page by page (the same function the module runs).
+  (function catches() {
+    var root = document.getElementById('catches');
+    D.pages.forEach(function (p) {
+      var box = document.createElement('section');
+      box.innerHTML = p.html;
+      prepUpkeep(box);
+      var folds = Array.prototype.map.call(box.querySelectorAll('.vel-upkeep > p'), function (n) { return n.textContent.trim(); });
+      var tags = Array.prototype.map.call(box.querySelectorAll('.vel-datetag'), function (n) { return n.textContent.trim(); });
+      var div = document.createElement('div');
+      div.className = 'catch';
+      var h = document.createElement('h4');
+      h.textContent = titleOf(p) + ' · ' + folds.length + ' folded, ' + tags.length + ' dimmed';
+      div.appendChild(h);
+      if (folds.length || tags.length) {
+        var ul = document.createElement('ul');
+        folds.forEach(function (f) {
+          var li = document.createElement('li');
+          li.className = 'fold';
+          var k = document.createElement('span'); k.className = 'k'; k.textContent = 'Folded';
+          li.appendChild(k);
+          li.appendChild(document.createTextNode(f));
+          ul.appendChild(li);
+        });
+        tags.forEach(function (f) {
+          var li = document.createElement('li');
+          var k = document.createElement('span'); k.className = 'k'; k.textContent = 'Dimmed';
+          li.appendChild(k);
+          li.appendChild(document.createTextNode(f));
+          ul.appendChild(li);
+        });
+        div.appendChild(ul);
+      }
+      root.appendChild(div);
+    });
+  })();
+
+  // ---------- the verdict (db) ----------
+  var OPTS = [
+    ['ship', 'Looks right, deploy it', 'Before S144, with its own off switch. I message the other sessions first, then you check it in Foundry.'],
+    ['change', 'Change something first', 'Say what in the box below, and I will rebuild the mock.'],
+    ['after', 'Looks right, but deploy after S144', 'Saturday runs on what you know.']
+  ];
+  var st = document.getElementById('st-mock');
+  var picked = null;
+  var optRoot = document.getElementById('opts-mock');
+  OPTS.forEach(function (o) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'opt';
+    b.id = 'mock-' + o[0];
+    b.dataset.v = o[0];
+    b.setAttribute('aria-pressed', 'false');
+    var t = document.createElement('b'); t.textContent = o[1];
+    var s = document.createElement('span'); s.textContent = o[2];
+    b.appendChild(t); b.appendChild(s);
+    b.addEventListener('click', function () { picked = o; paint(); save(); });
+    optRoot.appendChild(b);
+  });
+  function paint() {
+    optRoot.querySelectorAll('.opt').forEach(function (x) { x.setAttribute('aria-pressed', String(!!picked && x.dataset.v === picked[0])); });
+  }
+  var db = null;
+  function save() {
+    if (!db) { st.textContent = 'Not saved here'; st.className = 'status err'; return; }
+    st.textContent = 'Saving'; st.className = 'status';
+    db.doc('rulings/mock').set({ choice: picked ? picked[0] : null, choiceText: picked ? picked[1] : null, note: document.getElementById('note-mock').value, savedAt: new Date().toISOString() })
+      .then(function () { st.textContent = 'Saved'; st.className = 'status saved'; })
+      .catch(function (e) { st.textContent = 'Not saved: ' + ((e && e.code) || 'error'); st.className = 'status err'; });
+  }
+  document.getElementById('note-mock').addEventListener('change', save);
+  var use = window.claude && typeof window.claude.use === 'function' ? window.claude.use('db') : Promise.resolve(null);
+  use.then(function (d) {
+    db = d;
+    if (!db) return;
+    db.doc('rulings/mock').get().then(function (snap) {
+      if (!snap || !snap.exists) return;
+      var v = snap.data();
+      if (!v) return;
+      if (v.note) document.getElementById('note-mock').value = v.note;
+      picked = OPTS.filter(function (o) { return o[0] === v.choice; })[0] || null;
+      paint();
+      if (picked || v.note) { st.textContent = 'Saved'; st.className = 'status saved'; }
+    }).catch(function () {});
+  });
+
+  // A bare #token opens a tab (#wick #gardhu #s142 #eden #scion #gm). Query params
+  // (?theme=light&ship=1&width=narrow) are for local screenshots only.
+  (function start() {
+    var map = { wick: 'Wick', gardhu: 'Gardhu', s142: 'S142', eden: 'Eden', scion: 'Scion Guardians', gm: 'gm' };
+    var q = {};
+    String(location.search || '').replace(/^\?/, '').split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) q[p[0]] = p[1]; });
+    if (q.theme === 'light') document.getElementById('th-light').click();
+    if (q.ship === '1') document.getElementById('ship-yes').click();
+    if (q.width === 'narrow') document.getElementById('w-narrow').click();
+    if (q.tall === '1') document.body.classList.add('tall');
+    var key = map[String(location.hash || '').replace('#', '').toLowerCase()];
+    selectTab(key || 'Wick');
+    if (q.selftest === '1') selftest();
+  })();
+
+  // ?selftest=1 (local, headless): hover, same-window link, Back, the GM tab.
+  function selftest() {
+    var out = [];
+    var log = function (k, v) { out.push(k + ': ' + v); };
+    var pre = document.createElement('pre');
+    pre.id = 'selftest';
+    pre.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;margin:0;padding:12px;background:#fff;color:#000;font:13px/1.4 monospace;white-space:pre-wrap';
+    var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+    var title = function () { var t = document.querySelector('.mock-window .window-header .t'); return t ? t.textContent : '(none)'; };
+    (async function () {
+      try {
+        log('start', title());
+        var a = document.querySelector('.mock-window .vel-head-lead a.content-link');
+        a.dispatchEvent(new MouseEvent('mouseenter'));
+        await wait(600);
+        var card = document.querySelector('body > .vel-card');
+        log('card', card ? card.querySelector('.vel-card-name').textContent + ' | ' + (card.querySelector('.vel-card-say') || {}).textContent + ' | img ' + !!card.querySelector('img') : 'none');
+        a.dispatchEvent(new MouseEvent('mouseleave'));
+        var chip = [].slice.call(document.querySelectorAll('.mock-window .vel-assoc a.content-link')).filter(function (x) { return x.textContent.trim() === 'Solder'; })[0];
+        chip.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+        await wait(100);
+        log('after click', title());
+        var back = document.querySelector('.mock-window .vel-back');
+        log('back button', back ? back.textContent : 'none');
+        if (back) back.click();
+        await wait(100);
+        log('after back', title() + ' back=' + !!document.querySelector('.mock-window .vel-back'));
+        var jumps = document.querySelectorAll('.mock-window .vel-jump-link').length;
+        log('jump links', jumps);
+        selectTab('S142');
+        await wait(300);
+        log('s142 cast chips', document.querySelectorAll('.mock-window .vel-cast .vel-chip').length + ' beats ' + document.querySelectorAll('.mock-window .vel-beats .vel-jump-link').length);
+        var eden = [].slice.call(document.querySelectorAll('.mock-window .vel-cast a.content-link')).filter(function (x) { return x.textContent.trim() === 'Eden'; })[0];
+        if (eden) eden.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+        await wait(100);
+        log('s142 -> eden', title() + ' back=' + ((document.querySelector('.mock-window .vel-back') || {}).textContent || 'none'));
+        selectTab('gm');
+        await wait(300);
+        log('gm cards', document.querySelectorAll('.gm-grid .vel-sp--compact').length + ' open-full ' + document.querySelectorAll('.gm-grid .vel-open-full').length);
+        log('errors', window.__errs.length ? window.__errs.join(' // ') : 'none');
+      } catch (e) {
+        log('THREW', e && e.stack ? e.stack : e);
+      }
+      pre.textContent = out.join('\n');
+      document.body.appendChild(pre);
+    })();
+  }
+})();
+</script>
