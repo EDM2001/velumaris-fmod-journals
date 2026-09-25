@@ -469,7 +469,12 @@ async function offerRepoint(newest) {
  * The NPCs tab, filled from the night's cast (P2 round 1, card 9). `table-sheet.js`
  * stamps the Session Guide's "Important NPCs" on the sheet as `flags.velumaris.cast`;
  * this offers, once per sheet, to put each of them in a cell of the tab called
- * "NPCs" (the compendium page, which the module then shows as a compact card).
+ * "NPCs", which the module then shows as a compact card.
+ *
+ * Each cell holds the NPC's PAGE, not the entry: the shape the GM Screen itself
+ * writes when a page is dragged in. A page cell shows the page alone, where an
+ * entry cell wraps it in the journal window's own header and sidebar (the DM
+ * dragged all six S144 cells in by hand to get that, 2026-09-25).
  */
 async function offerNpcTab(newest) {
   const cast = newest.flags.velumaris.cast;
@@ -485,7 +490,10 @@ async function offerNpcTab(newest) {
   const picks = [];
   for (const name of cast) {
     const hit = index.find((e) => e.name === name && e.flags && e.flags.velumaris && e.flags.velumaris.type === 'npc');
-    if (hit) picks.push({ name, uuid: `Compendium.${pack.collection}.JournalEntry.${hit._id}` });
+    if (!hit) continue;
+    const entry = await pack.getDocument(hit._id);
+    const page = entry && entry.pages.contents.sort((a, b) => a.sort - b.sort)[0];
+    if (page) picks.push({ name, uuid: page.uuid });
   }
   if (!picks.length) return;
   const now = Object.values(grid.entries || {}).map((c) => c.entityUuid).filter(Boolean);
@@ -507,7 +515,7 @@ async function offerNpcTab(newest) {
     const x = (i % cols) + 1;
     const y = Math.floor(i / cols) + 1;
     const entryId = `${x}-${y}`;
-    entries[entryId] = { x, y, entryId, entityUuid: p.uuid, type: 'JournalEntry' };
+    entries[entryId] = { x, y, entryId, entityUuid: p.uuid, type: 'JournalEntryPage', isDndNpc: false, isDndNpcStatBlock: false };
   });
   const next = foundry.utils.deepClone(config);
   next.grids[gridId].entries = entries;
