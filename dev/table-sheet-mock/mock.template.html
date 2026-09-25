@@ -1,0 +1,416 @@
+<title>Table Sheet Refit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Outfit:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  :root {
+    --ground: #eceff3;
+    --panel: #ffffff;
+    --ink: #151b27;
+    --ink-2: #435064;
+    --ink-3: #6c7688;
+    --rule: #d6dbe3;
+    --gold: #8a5a0e;
+    --gold-soft: #f5ecd9;
+    --pick: #1f4e79;
+    --pick-ink: #ffffff;
+    --shadow: 0 1px 2px rgba(21,27,39,.07), 0 6px 18px rgba(21,27,39,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #020617;
+      --panel: #0f172a;
+      --ink: #e6e9ef;
+      --ink-2: #aab3c2;
+      --ink-3: #7d8799;
+      --rule: #1f2a3d;
+      --gold: #fac775;
+      --gold-soft: #2a2008;
+      --pick: #8fb8e8;
+      --pick-ink: #06121f;
+      --shadow: 0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #020617;
+    --panel: #0f172a;
+    --ink: #e6e9ef;
+    --ink-2: #aab3c2;
+    --ink-3: #7d8799;
+    --rule: #1f2a3d;
+    --gold: #fac775;
+    --gold-soft: #2a2008;
+    --pick: #8fb8e8;
+    --pick-ink: #06121f;
+    --shadow: 0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.3);
+  }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "EB Garamond", Georgia, serif;
+    font-size: 18px;
+    line-height: 1.55;
+    margin: 0;
+    padding-inline: 16px;
+    padding-block: 0 80px;
+  }
+  .wrap { max-width: 1920px; margin: 0 auto; }
+  .ui { font-family: Outfit, system-ui, sans-serif; }
+  header.top { padding-block: 34px 18px; max-width: 760px; }
+  .eyebrow {
+    font-family: Outfit, system-ui, sans-serif; font-size: 12px; font-weight: 500;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 10px;
+  }
+  h1 {
+    font-family: Cinzel, Georgia, serif; font-size: clamp(30px, 7vw, 44px); font-weight: 600;
+    line-height: 1.05; margin: 0 0 12px; text-wrap: balance;
+  }
+  .standfirst { font-size: 18.5px; color: var(--ink-2); margin: 0 0 14px; }
+  .try {
+    font-family: Outfit, system-ui, sans-serif; font-size: 14.5px; color: var(--ink-2);
+    margin: 0; padding-left: 18px; line-height: 1.5;
+  }
+  .try li { margin-bottom: 4px; }
+  .try b { color: var(--ink); font-weight: 600; }
+
+  .bar {
+    display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+    margin: 18px 0 10px; font-family: Outfit, system-ui, sans-serif; font-size: 13px; color: var(--ink-3);
+  }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 13px; border: 0; background: var(--panel); color: var(--ink-2);
+    padding: 6px 14px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--pick); color: var(--pick-ink); }
+  .seg button:focus-visible { outline: 2px solid var(--pick); outline-offset: -2px; }
+  .reset {
+    font: inherit; font-size: 13px; background: none; border: 1px solid var(--rule); color: var(--ink-2);
+    border-radius: 999px; padding: 6px 14px; cursor: pointer;
+  }
+
+  /* A stand-in for the GM Screen drawer: tabs, then cells. */
+  .drawer { border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
+  .drawer.theme-dark { background: #10131a; border: 1px solid #262b36; }
+  .drawer.theme-light { background: #e7e4dc; border: 1px solid #cfcabd; }
+  .tabs { display: flex; gap: 2px; padding: 6px 8px 0; font-family: Outfit, system-ui, sans-serif; font-size: 13px; overflow-x: auto; }
+  .tabs button {
+    font: inherit; border: 0; cursor: pointer; padding: 7px 14px; border-radius: 6px 6px 0 0;
+    white-space: nowrap;
+  }
+  .theme-dark .tabs button { background: #1a1f2a; color: #9aa3b3; }
+  .theme-dark .tabs button[aria-selected="true"] { background: #232a38; color: #fff; }
+  .theme-light .tabs button { background: #d8d4ca; color: #4a5160; }
+  .theme-light .tabs button[aria-selected="true"] { background: #f4f2ec; color: #111; }
+  .tabs button:disabled { opacity: .45; cursor: default; }
+  .grid { display: grid; gap: 8px; padding: 8px; }
+  .theme-dark .grid { background: #232a38; }
+  .theme-light .grid { background: #f4f2ec; }
+  .grid.quick { grid-template-columns: minmax(0, 1fr); }
+  .grid.ra { grid-template-columns: minmax(0, 1fr); }
+  .cell { min-width: 0; }
+  @media (min-width: 980px) {
+    .grid.quick { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .grid.quick.whole { grid-template-columns: minmax(0, 1fr); }
+    .cell { height: max(460px, calc(60vh - 56px)); overflow: auto; }
+  }
+  .caption { font-family: Outfit, system-ui, sans-serif; font-size: 12.5px; color: var(--ink-3); margin: 8px 2px 0; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+    max-width: min(560px, calc(100vw - 32px)); background: var(--ink); color: var(--ground);
+    font-family: Outfit, system-ui, sans-serif; font-size: 14px; padding: 10px 16px; border-radius: 8px;
+    box-shadow: var(--shadow); z-index: 20000; opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .toast.on { opacity: 1; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--rule); box-shadow: var(--shadow);
+    padding: 20px; margin: 34px 0 0; max-width: 760px;
+  }
+  .card h2 { font-family: Cinzel, Georgia, serif; font-size: 24px; font-weight: 600; margin: 0 0 10px; }
+  .card p { margin: 0 0 12px; color: var(--ink-2); }
+  .opts { display: grid; gap: 9px; }
+  button.opt {
+    display: block; width: 100%; text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+    background: var(--ground); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 14px;
+  }
+  button.opt .lbl { font-family: Outfit, system-ui, sans-serif; font-size: 16px; font-weight: 500; display: block; }
+  button.opt .sub { display: block; font-size: 16px; color: var(--ink-2); }
+  button.opt .rec {
+    font-family: Outfit, system-ui, sans-serif; font-size: 10.5px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); border-radius: 2px;
+    padding: 1px 5px; margin-left: 7px; vertical-align: 2px;
+  }
+  button.opt[aria-pressed="true"] { background: var(--pick); border-color: var(--pick); color: var(--pick-ink); }
+  button.opt[aria-pressed="true"] .sub, button.opt[aria-pressed="true"] .rec { color: var(--pick-ink); border-color: var(--pick-ink); }
+  button.opt:focus-visible { outline: 2px solid var(--pick); outline-offset: 2px; }
+  label.n { display: block; font-family: Outfit, system-ui, sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin: 14px 0 5px; }
+  textarea {
+    width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; background: var(--ground); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 9px 11px; min-height: 70px; resize: vertical;
+  }
+  .savenote { font-family: Outfit, system-ui, sans-serif; font-size: 12px; color: var(--ink-3); margin: 8px 0 0; min-height: 16px; }
+  .savenote.ok { color: var(--pick); }
+  footer { margin-top: 40px; font-family: Outfit, system-ui, sans-serif; font-size: 13px; color: var(--ink-3); max-width: 760px; }
+
+/*MODULE_CSS*/
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Foundry journals &middot; the look, before Foundry sees it</p>
+    <h1>Table Sheet Refit</h1>
+    <p class="standfirst">This is tomorrow's S144 sheet as it's stored in Foundry right now, drawn by the new module's own stylesheet and script. Only Foundry itself is faked, so this is the look and the behaviour you'll get in the GM Screen drawer.</p>
+    <ul class="try">
+      <li><b>Tick a secret.</b> In Foundry the tick is saved on the sheet and survives a re-push.</li>
+      <li><b>Tap a scene</b> to make it current. The earlier ones dim, and the Read aloud page next to it marks and scrolls to that scene's beats.</li>
+      <li><b>Hover a name</b>, or tap it on a phone, for the portrait and the first line of the NPC note. A click opens the page.</li>
+      <li><b>The map chips</b> on a scene line: the name views that map for you only. <em>Players</em> shows it to the table, and only on a second tap.</li>
+      <li><b>Hover a ceiling</b> in the party grid to see what it's made of.</li>
+      <li><b>Tap a spare name</b> when you use one. It lights up and stays lit, so afterwards you can see who you invented tonight.</li>
+    </ul>
+  </header>
+
+  <div class="bar">
+    <span>Foundry theme</span>
+    <span class="seg" role="group" aria-label="Foundry theme">
+      <button type="button" data-theme-pick="dark" aria-pressed="true">Dark</button>
+      <button type="button" data-theme-pick="light" aria-pressed="false">Light</button>
+    </span>
+    <span>The sheet's cell</span>
+    <span class="seg" role="group" aria-label="The sheet's cell">
+      <button type="button" data-width-pick="half" aria-pressed="true">Half the drawer (now)</button>
+      <button type="button" data-width-pick="whole" aria-pressed="false">The whole drawer</button>
+    </span>
+    <button type="button" class="reset" id="reset">Clear ticks and scene</button>
+  </div>
+
+  <div class="drawer theme-dark" id="drawer">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" aria-selected="true" data-tab="quick">Quick Ref</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="ra" hidden>Read aloud</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="recap">Recap</button>
+      <button type="button" role="tab" aria-selected="false" disabled>NPCs</button>
+    </div>
+    <div class="grid quick" data-pane="quick">
+      <div class="cell"><!--SHEET--></div>
+      <div class="cell" id="ra-cell"><!--READ_ALOUD--></div>
+    </div>
+    <div class="grid ra" data-pane="ra" hidden></div>
+    <div class="grid recap" data-pane="recap" hidden>
+      <div class="cell"><!--RECAP--></div>
+    </div>
+  </div>
+  <p class="caption">On a wide screen the two cells sit side by side, as they do in your <em>Quick Ref</em> tab, and each scrolls on its own at the height of your drawer (60% of the screen). On a phone they stack.</p>
+
+  <section class="card" data-q="mock">
+    <h2>Is this the look?</h2>
+    <p>If it is, I'll deploy the module. Foundry restarts once, after I've checked with the other sessions. Then you tick <em>Velumaris: Journals</em> in Manage Modules, and I push a spare copy of the S144 sheet into a <em>Table Sheet Previews</em> folder so you can check it in the real drawer before the live sheet gets the look.</p>
+    <div class="opts">
+      <button class="opt" type="button" data-k="ship"><span class="lbl">Looks right, deploy it<span class="rec">Rec.</span></span><span class="sub">The steps above, today, so it's in place for Saturday.</span></button>
+      <button class="opt" type="button" data-k="change"><span class="lbl">Change something first</span><span class="sub">Say what in the note, and I'll bring it back on this page.</span></button>
+      <button class="opt" type="button" data-k="after"><span class="lbl">Keep it for after Saturday</span><span class="sub">S144 runs on today's plain sheet (the AI notes are already gone from it).</span></button>
+    </div>
+    <label class="n" for="n-mock">What to change, or anything else</label>
+    <textarea id="n-mock" placeholder="optional"></textarea>
+    <p class="savenote" id="save-mock"></p>
+  </section>
+
+  <section class="card" data-q="drawer">
+    <h2>Give the sheet the whole drawer?</h2>
+    <p>Measured at your drawer's size: sharing the Quick Ref tab with <em>Read aloud</em>, the sheet is about one and a half drawer-heights tall at the start of the night, and it shrinks as scenes fold away. With the whole width it gets a third column and comes close to one screen. Try both with <em>The sheet's cell</em> above, on a wide screen.</p>
+    <div class="opts">
+      <button class="opt" type="button" data-k="whole"><span class="lbl">The whole Quick Ref tab, and Read aloud gets its own tab<span class="rec">Rec.</span></span><span class="sub">You drag the cells once in the GM Screen. I update the <em>Sync GM Screen</em> macro's wiring to match, and the module's repoint follows the pages wherever they sit.</span></button>
+      <button class="opt" type="button" data-k="half"><span class="lbl">Keep them side by side</span><span class="sub">The sheet scrolls a little in its cell, and the read-aloud stays one glance away.</span></button>
+    </div>
+    <label class="n" for="n-drawer">Anything to add</label>
+    <textarea id="n-drawer" placeholder="optional"></textarea>
+    <p class="savenote" id="save-drawer"></p>
+  </section>
+
+  <footer>The <em>Recap</em> tab holds the recap page. The NPCs tab is only for show here.</footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+/*MODULE_CORE*/
+/*NPCS*/
+  var SCENES = {
+    "Eden (From Above)": true,
+    "Eden — The Approach to the Crossing": true,
+    "Eden — The Crossing Out": true
+  };
+  var STORE = "vel-mock-state-s144";
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
+  function persist() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("on"); }, 2600);
+  }
+
+  var env = {
+    theme: function (node) {
+      var t = node.closest(".theme-light, .theme-dark");
+      return t && t.classList.contains("theme-light") ? "light" : "dark";
+    },
+    getState: function (id) { return state[id] || {}; },
+    setState: function (id, patch, opts) {
+      var cur = state[id] || {};
+      var next = Object.assign({}, cur, patch);
+      next.secrets = Object.assign({}, cur.secrets || {}, patch.secrets || {});
+      next.spare = Object.assign({}, cur.spare || {}, patch.spare || {});
+      state[id] = next;
+      persist();
+      var o = Object.assign({}, opts || {});
+      if (window.innerWidth < 980) o.scroll = false;
+      refreshEntry(id, env, o);
+    },
+    sceneInfo: function (name) { return { exists: !!SCENES[name], active: false }; },
+    viewScene: function (name) { toast("Views “" + name + "” for you only. The players stay where they are."); },
+    activateScene: function (name) { toast("Shows “" + name + "” to the players."); },
+    lookupName: function (name) { return Promise.resolve(NPCS[name] || null); },
+    openName: function (name) { toast(NPCS[name] ? "Opens " + name + "’s NPC page." : "No NPC page called " + name + "."); }
+  };
+
+  // Foundry turns @UUID[...]{label} into a link when it shows a page; do the same.
+  document.querySelectorAll(WRAPPER_SELECTOR).forEach(function (w) {
+    w.innerHTML = w.innerHTML.replace(/@UUID\[[^\]]+\]\{([^}]+)\}/g, '<a class="content-link" data-mock-link="1">$1</a>');
+    enhance(w, env);
+  });
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest("a[data-mock-link]");
+    if (!a) return;
+    ev.preventDefault();
+    var label = a.textContent.toLowerCase();
+    toast(label.indexOf("recap") !== -1 ? "Opens the Recap page." : "Opens the Read aloud page.");
+  });
+
+  // Names on a touch screen: a tap shows the card, since there is no hover.
+  if (window.matchMedia && window.matchMedia("(hover: none)").matches) {
+    document.querySelectorAll(".vel-name").forEach(function (n) {
+      n.addEventListener("click", function (ev) {
+        ev.stopImmediatePropagation();
+        n.dispatchEvent(new MouseEvent("mouseenter"));
+      }, true);
+    });
+    document.addEventListener("click", function (ev) {
+      if (!ev.target.closest(".vel-name, .vel-card")) {
+        var c = document.querySelector(".vel-card");
+        if (c) c.remove();
+      }
+    });
+  }
+
+  var drawer = document.getElementById("drawer");
+  document.querySelectorAll("[data-theme-pick]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var theme = b.dataset.themePick;
+      drawer.classList.toggle("theme-dark", theme === "dark");
+      drawer.classList.toggle("theme-light", theme === "light");
+      document.querySelectorAll("[data-theme-pick]").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      document.querySelectorAll(".vel-ts").forEach(function (w) {
+        w.classList.toggle("vel-light", theme === "light");
+        w.classList.toggle("vel-dark", theme !== "light");
+      });
+    });
+  });
+  document.querySelectorAll(".tabs [data-tab]").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tabs [data-tab]").forEach(function (o) { o.setAttribute("aria-selected", o === t ? "true" : "false"); });
+      document.querySelectorAll("[data-pane]").forEach(function (p) { p.hidden = p.dataset.pane !== t.dataset.tab; });
+    });
+  });
+  document.getElementById("reset").addEventListener("click", function () {
+    state = {};
+    persist();
+    document.querySelectorAll(WRAPPER_SELECTOR).forEach(function (w) { refreshEntry(readMeta(w).entryId, env); });
+  });
+
+  // The sheet's cell: half the drawer (as the DM has it) or all of it.
+  var quick = document.querySelector(".grid.quick");
+  var raPane = document.querySelector('[data-pane="ra"]');
+  var raCell = document.getElementById("ra-cell");
+  var raTab = document.querySelector('.tabs [data-tab="ra"]');
+  document.querySelectorAll("[data-width-pick]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var whole = b.dataset.widthPick === "whole";
+      document.querySelectorAll("[data-width-pick]").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      quick.classList.toggle("whole", whole);
+      raTab.hidden = !whole;
+      if (whole) raPane.appendChild(raCell); else quick.appendChild(raCell);
+      document.querySelector('.tabs [data-tab="quick"]').click();
+    });
+  });
+
+  // The review answers, saved where Claude can read them back.
+  var dbp = null;
+  var QUESTIONS = { mock: "Is this the look?", drawer: "Give the sheet the whole drawer?" };
+  function cardOf(q) { return document.querySelector('.card[data-q="' + q + '"]'); }
+  function stampOf(q) { return document.getElementById("save-" + q); }
+  function paint(q, k) {
+    cardOf(q).querySelectorAll("button.opt").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false"); });
+  }
+  function save(q) {
+    var card = cardOf(q);
+    var st = stampOf(q);
+    var picked = card.querySelector('button.opt[aria-pressed="true"]');
+    var note = document.getElementById("n-" + q);
+    if (!dbp) { st.textContent = "not saved: this view can't reach the store"; st.className = "savenote"; return; }
+    var payload = {
+      question: QUESTIONS[q],
+      choice: picked ? picked.dataset.k : null,
+      label: picked ? picked.querySelector(".lbl").textContent.replace(/Rec\.\s*$/, "").trim() : null,
+      note: note.value,
+      at: new Date().toISOString()
+    };
+    dbp.doc("rulings/" + q).set(payload).then(function () {
+      st.textContent = "saved · " + new Date().toLocaleTimeString();
+      st.className = "savenote ok";
+    }).catch(function () {
+      st.textContent = "NOT saved. Tap your answer again";
+      st.className = "savenote";
+    });
+  }
+  Object.keys(QUESTIONS).forEach(function (q) {
+    cardOf(q).querySelectorAll("button.opt").forEach(function (b) {
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () { paint(q, b.dataset.k); save(q); });
+    });
+    var t = null;
+    document.getElementById("n-" + q).addEventListener("input", function () {
+      clearTimeout(t);
+      stampOf(q).textContent = "…";
+      t = setTimeout(function () { save(q); }, 900);
+    });
+  });
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then(function (db) {
+      if (!db) return;
+      dbp = db;
+      Object.keys(QUESTIONS).forEach(function (q) {
+        db.doc("rulings/" + q).get().then(function (d) {
+          if (!d || !d.exists) return;
+          var v = d.data() || {};
+          if (v.choice) paint(q, v.choice);
+          var note = document.getElementById("n-" + q);
+          if (v.note && !note.value) note.value = v.note;
+          stampOf(q).textContent = "answered";
+          stampOf(q).className = "savenote ok";
+        }).catch(function () {});
+      });
+    }).catch(function () {});
+  }
+})();
+</script>
