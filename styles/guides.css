@@ -1,0 +1,450 @@
+/*
+ * The GM guides: run guides (one per fight) and arc guides (one per arc). DM rulings
+ * 2026-09-26, card 11: the working look, the same as the Table Sheet. Everything here
+ * sits on `.vel-guide`, which scripts/guides.mjs adds alongside `.vel-ts`, so the
+ * Table Sheet's tokens, type, ticks and read-aloud boxes apply as they are and this
+ * file only adds what a guide has that a sheet does not.
+ */
+
+.vel-guide.vel-dark {
+  --vel-ok: #6cc28c;
+  --vel-ok-soft: rgba(108, 194, 140, 0.14);
+  --vel-eden: #5b9dff;
+}
+.vel-guide.vel-light {
+  --vel-ok: #2d6a44;
+  --vel-ok-soft: rgba(45, 106, 68, 0.1);
+  --vel-eden: #1d4fb8;
+}
+
+.vel-ts.vel-guide {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+
+  & .vel-gbody {
+    display: grid;
+    gap: 10px 22px;
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  & h3 {
+    font-family: var(--vel-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--vel-ink-2);
+    border: none;
+    margin: 8px 0 4px;
+    padding: 0;
+    text-shadow: none;
+  }
+  & .vel-gsec {
+    min-width: 0;
+  }
+  & .vel-gsec > ul > li:not(.vel-tickable):not(.vel-beat):not(.vel-schip) {
+    position: relative;
+    padding-left: 12px;
+    margin: 0 0 3px;
+  }
+  & .vel-gsec > ul > li:not(.vel-tickable):not(.vel-beat):not(.vel-schip)::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.62em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--vel-gold);
+  }
+  & table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 2px 0 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  & th,
+  & td {
+    text-align: left;
+    padding: 3px 6px 3px 0;
+    border: none;
+    border-bottom: 1px solid var(--vel-rule-soft);
+    vertical-align: top;
+    background: none;
+  }
+  & th {
+    font-weight: 600;
+    color: var(--vel-ink-2);
+  }
+}
+
+/* Two columns once the cell is wide enough, three in a whole drawer. The toolbar and
+   the arc guide's strip always run the full width. */
+@container (min-width: 760px) {
+  .vel-ts.vel-rg .vel-gbody {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+  .vel-rg .vel-gsec--top,
+  .vel-rg .vel-gsec--how-it-fights {
+    grid-column: 1 / -1;
+  }
+}
+@container (min-width: 1300px) {
+  .vel-ts.vel-rg .vel-gbody {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* ── The toolbar ── */
+
+.vel-ts.vel-ts .vel-gbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.vel-ts.vel-ts .vel-gbtn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  font: 600 11.5px/1 var(--vel-ui);
+  letter-spacing: 0.02em;
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: var(--vel-gold);
+  color: var(--vel-on-gold);
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--vel-gold);
+    outline-offset: 2px;
+  }
+  &.vel-gbtn--quiet {
+    background: transparent;
+    color: var(--vel-ink-2);
+    border: 1px solid var(--vel-rule);
+  }
+  &.vel-gbtn--end {
+    margin-left: auto;
+  }
+}
+
+/* ── The counters ── */
+
+.vel-ts.vel-ts .vel-counters {
+  display: grid;
+  gap: 6px;
+  background: var(--vel-panel);
+  border: 1px solid var(--vel-rule);
+  border-radius: 6px;
+  padding: 7px 9px;
+  margin: 0 0 8px;
+}
+.vel-ts.vel-ts .vel-crow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: center;
+}
+.vel-ts.vel-ts .vel-cname {
+  font-weight: 600;
+  width: 100%;
+}
+.vel-ts.vel-ts .vel-ccell {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.vel-ts.vel-ts .vel-clabel {
+  font-size: 11px;
+  color: var(--vel-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.vel-ts.vel-ts .vel-pips {
+  display: inline-flex;
+  gap: 4px;
+}
+.vel-ts.vel-ts .vel-pip {
+  all: unset;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--vel-ink-3);
+  cursor: pointer;
+
+  &.is-on {
+    background: var(--vel-gold);
+    border-color: var(--vel-gold);
+    box-shadow: inset 0 0 0 2px var(--vel-panel);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--vel-gold);
+    outline-offset: 2px;
+  }
+}
+.vel-ts.vel-ts .vel-recharge {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  border: 1px dashed var(--vel-ink-3);
+  color: var(--vel-ink-3);
+
+  &.is-ready {
+    border: 1px solid var(--vel-gold);
+    color: var(--vel-gold);
+    background: var(--vel-gold-soft);
+    font-weight: 600;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--vel-gold);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Turn templates ── */
+
+.vel-ts.vel-ts .vel-turns {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 4px 0 0;
+}
+.vel-ts.vel-ts .vel-turn {
+  background: var(--vel-panel);
+  border: 1px solid var(--vel-rule);
+  border-radius: 6px;
+  padding: 7px 9px;
+
+  & h3 {
+    margin: 0 0 4px;
+    color: var(--vel-gold);
+  }
+  & p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ── The arc guide: the strip ── */
+
+.vel-ts.vel-ts .vel-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.vel-ts.vel-ts .vel-schip {
+  background: var(--vel-panel);
+  border: 1px solid var(--vel-rule);
+  border-radius: 6px;
+  padding: 5px 9px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 100%;
+
+  & > strong {
+    font-family: var(--vel-display);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--vel-gold);
+  }
+  &.vel-schip--still-to-build {
+    border-color: var(--vel-warn);
+    & > strong {
+      color: var(--vel-warn);
+    }
+  }
+  &.is-changed {
+    border-color: var(--vel-gold);
+    box-shadow: 0 0 0 1px var(--vel-gold) inset;
+  }
+}
+.vel-ts.vel-ts .vel-att {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+}
+.vel-ts.vel-ts .vel-att-live {
+  font: 700 15px/1 var(--vel-display);
+  min-width: 1.2em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.vel-ts.vel-ts .vel-att-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: inline-grid;
+  place-items: center;
+  font: 700 14px/1 var(--vel-ui);
+  border: 1px solid var(--vel-rule);
+  color: var(--vel-ink);
+
+  &:hover {
+    border-color: var(--vel-gold);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--vel-gold);
+    outline-offset: 2px;
+  }
+}
+
+/* ── The arc guide: the route ── */
+
+.vel-ts.vel-ts .vel-ring {
+  border-top: 1px solid var(--vel-rule-soft);
+  padding: 4px 0;
+
+  & > summary {
+    cursor: pointer;
+    font-family: var(--vel-display);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vel-eden);
+    padding: 3px 0;
+    list-style-position: inside;
+  }
+  &:not([open]) > summary {
+    opacity: 0.6;
+  }
+  & > ul {
+    display: grid;
+    gap: 3px;
+    margin: 2px 0 4px;
+  }
+}
+.vel-ts.vel-ts .vel-beat {
+  display: block;
+  padding: 3px 6px;
+  margin: 0 -6px;
+  border-radius: 4px;
+  line-height: 1.4;
+
+  &:hover {
+    background: var(--vel-panel-2);
+  }
+  &.vel-beat--o {
+    color: var(--vel-ink-2);
+  }
+  &[data-vel-status='cut'] {
+    opacity: 0.45;
+    text-decoration: line-through;
+  }
+  &[data-vel-status='played'],
+  &[data-vel-status='skipped'] {
+    opacity: 0.6;
+  }
+  &[data-vel-status='next'] {
+    background: var(--vel-gold-soft);
+  }
+  &.is-played-live {
+    background: var(--vel-ok-soft);
+    opacity: 1;
+  }
+}
+.vel-ts.vel-ts .vel-pill {
+  display: inline-block;
+  font: 600 10.5px/1 var(--vel-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 6px;
+  border-radius: 99px;
+  margin: 0 4px;
+  border: 1px solid var(--vel-rule);
+  color: var(--vel-ink-2);
+  vertical-align: 1px;
+
+  &.vel-pill--played {
+    color: var(--vel-ok);
+    border-color: var(--vel-ok);
+  }
+  &.vel-pill--next {
+    color: var(--vel-on-gold);
+    background: var(--vel-gold);
+    border-color: var(--vel-gold);
+  }
+  &.vel-pill--ready {
+    color: var(--vel-gold);
+    border-color: var(--vel-gold);
+  }
+  &.vel-pill--needs-building {
+    color: var(--vel-warn);
+    border-color: var(--vel-warn);
+  }
+}
+.vel-ts.vel-ts .vel-played {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  margin-left: 6px;
+  border-radius: 99px;
+  border: 1px dashed var(--vel-ink-3);
+  color: var(--vel-ink-3);
+  opacity: 0;
+  transition: opacity 0.12s;
+
+  &[aria-pressed='true'] {
+    opacity: 1;
+    border: 1px solid var(--vel-ok);
+    color: var(--vel-ok);
+    font-weight: 600;
+  }
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid var(--vel-gold);
+    outline-offset: 2px;
+  }
+}
+.vel-ts.vel-ts .vel-beat:hover .vel-played {
+  opacity: 1;
+}
+@media (hover: none) {
+  .vel-ts.vel-ts .vel-played {
+    opacity: 1;
+  }
+}
+
+.vel-ts.vel-ts .vel-att-table tr.is-now td {
+  background: var(--vel-gold-soft);
+  color: var(--vel-ink);
+  font-weight: 600;
+}
+
+@container (min-width: 900px) {
+  .vel-ts.vel-ag .vel-gbody {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    grid-template-areas:
+      'where where'
+      'route attention'
+      'route companions'
+      'route build'
+      'route played';
+    align-items: start;
+  }
+  .vel-ag .vel-gsec--where-the-party-stands { grid-area: where; }
+  .vel-ag .vel-gsec--the-route-inward { grid-area: route; }
+  .vel-ag .vel-gsec--attention { grid-area: attention; }
+  .vel-ag .vel-gsec--companions { grid-area: companions; }
+  .vel-ag .vel-gsec--still-to-build { grid-area: build; }
+  .vel-ag .vel-gsec--played-so-far { grid-area: played; }
+}

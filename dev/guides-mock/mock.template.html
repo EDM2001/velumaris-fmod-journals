@@ -1,0 +1,393 @@
+<title>GM Guides Mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Outfit:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  :root {
+    --ground: #eceff3;
+    --panel: #ffffff;
+    --ink: #151b27;
+    --ink-2: #435064;
+    --ink-3: #6c7688;
+    --rule: #d6dbe3;
+    --gold: #8a5a0e;
+    --gold-soft: #f5ecd9;
+    --pick: #1f4e79;
+    --pick-ink: #ffffff;
+    --shadow: 0 1px 2px rgba(21,27,39,.07), 0 6px 18px rgba(21,27,39,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #020617;
+      --panel: #0f172a;
+      --ink: #e6e9ef;
+      --ink-2: #aab3c2;
+      --ink-3: #7d8799;
+      --rule: #1f2a3d;
+      --gold: #fac775;
+      --gold-soft: #2a2008;
+      --pick: #8fb8e8;
+      --pick-ink: #06121f;
+      --shadow: 0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #020617;
+    --panel: #0f172a;
+    --ink: #e6e9ef;
+    --ink-2: #aab3c2;
+    --ink-3: #7d8799;
+    --rule: #1f2a3d;
+    --gold: #fac775;
+    --gold-soft: #2a2008;
+    --pick: #8fb8e8;
+    --pick-ink: #06121f;
+    --shadow: 0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.3);
+  }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "EB Garamond", Georgia, serif;
+    font-size: 18px;
+    line-height: 1.55;
+    margin: 0;
+    padding-inline: 16px;
+    padding-block: 0 80px;
+  }
+  .wrap { max-width: 1920px; margin: 0 auto; }
+  header.top { padding-block: 34px 18px; max-width: 760px; }
+  .eyebrow {
+    font-family: Outfit, system-ui, sans-serif; font-size: 12px; font-weight: 500;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 10px;
+  }
+  h1 {
+    font-family: Cinzel, Georgia, serif; font-size: clamp(30px, 7vw, 44px); font-weight: 600;
+    line-height: 1.05; margin: 0 0 12px; text-wrap: balance;
+  }
+  .standfirst { font-size: 18.5px; color: var(--ink-2); margin: 0 0 14px; }
+  .try {
+    font-family: Outfit, system-ui, sans-serif; font-size: 14.5px; color: var(--ink-2);
+    margin: 0; padding-left: 18px; line-height: 1.5;
+  }
+  .try li { margin-bottom: 4px; }
+  .try b { color: var(--ink); font-weight: 600; }
+
+  .bar {
+    display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+    margin: 18px 0 10px; font-family: Outfit, system-ui, sans-serif; font-size: 13px; color: var(--ink-3);
+  }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 13px; border: 0; background: var(--panel); color: var(--ink-2);
+    padding: 6px 14px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--pick); color: var(--pick-ink); }
+  .seg button:focus-visible { outline: 2px solid var(--pick); outline-offset: -2px; }
+  .reset {
+    font: inherit; font-size: 13px; background: none; border: 1px solid var(--rule); color: var(--ink-2);
+    border-radius: 999px; padding: 6px 14px; cursor: pointer;
+  }
+
+  /* A stand-in for the GM Screen drawer: its eight tabs, then the cell. */
+  .drawer { border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
+  .drawer.theme-dark { background: #10131a; border: 1px solid #262b36; }
+  .drawer.theme-light { background: #e7e4dc; border: 1px solid #cfcabd; }
+  .tabs { display: flex; gap: 2px; padding: 6px 8px 0; font-family: Outfit, system-ui, sans-serif; font-size: 13px; overflow-x: auto; }
+  .tabs button {
+    font: inherit; border: 0; cursor: pointer; padding: 7px 14px; border-radius: 6px 6px 0 0;
+    white-space: nowrap;
+  }
+  .theme-dark .tabs button { background: #1a1f2a; color: #9aa3b3; }
+  .theme-dark .tabs button[aria-selected="true"] { background: #232a38; color: #fff; }
+  .theme-light .tabs button { background: #d8d4ca; color: #4a5160; }
+  .theme-light .tabs button[aria-selected="true"] { background: #f4f2ec; color: #111; }
+  .tabs button:disabled { opacity: .45; cursor: default; }
+  .grid { display: grid; gap: 8px; padding: 8px; grid-template-columns: minmax(0, 1fr); }
+  .theme-dark .grid { background: #232a38; }
+  .theme-light .grid { background: #f4f2ec; }
+  .grid.half { max-width: 980px; }
+  .cell { min-width: 0; }
+  @media (min-width: 980px) {
+    .cell { height: max(520px, calc(70vh - 56px)); overflow: auto; }
+  }
+  .caption { font-family: Outfit, system-ui, sans-serif; font-size: 12.5px; color: var(--ink-3); margin: 8px 2px 0; max-width: 900px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+    max-width: min(560px, calc(100vw - 32px)); background: var(--ink); color: var(--ground);
+    font-family: Outfit, system-ui, sans-serif; font-size: 14px; padding: 10px 16px; border-radius: 8px;
+    box-shadow: var(--shadow); z-index: 20000; opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .toast.on { opacity: 1; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--rule); box-shadow: var(--shadow);
+    padding: 20px; margin: 34px 0 0; max-width: 760px;
+  }
+  .card h2 { font-family: Cinzel, Georgia, serif; font-size: 24px; font-weight: 600; margin: 0 0 10px; }
+  .card p { margin: 0 0 12px; color: var(--ink-2); }
+  .card ol { font-family: Outfit, system-ui, sans-serif; font-size: 14.5px; color: var(--ink-2); margin: 0 0 14px; padding-left: 20px; }
+  .card ol li { margin-bottom: 4px; }
+  .opts { display: grid; gap: 9px; }
+  button.opt {
+    display: block; width: 100%; text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+    background: var(--ground); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 14px;
+  }
+  button.opt .lbl { font-family: Outfit, system-ui, sans-serif; font-size: 16px; font-weight: 500; display: block; }
+  button.opt .sub { display: block; font-size: 16px; color: var(--ink-2); }
+  button.opt .rec {
+    font-family: Outfit, system-ui, sans-serif; font-size: 10.5px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); border-radius: 2px;
+    padding: 1px 5px; margin-left: 7px; vertical-align: 2px;
+  }
+  button.opt[aria-pressed="true"] { background: var(--pick); border-color: var(--pick); color: var(--pick-ink); }
+  button.opt[aria-pressed="true"] .sub, button.opt[aria-pressed="true"] .rec { color: var(--pick-ink); border-color: var(--pick-ink); }
+  button.opt:focus-visible { outline: 2px solid var(--pick); outline-offset: 2px; }
+  label.n { display: block; font-family: Outfit, system-ui, sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin: 14px 0 5px; }
+  textarea {
+    width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; background: var(--ground); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 9px 11px; min-height: 70px; resize: vertical;
+  }
+  .savenote { font-family: Outfit, system-ui, sans-serif; font-size: 12px; color: var(--ink-3); margin: 8px 0 0; min-height: 16px; }
+  .savenote.ok { color: var(--pick); }
+  footer { margin-top: 40px; font-family: Outfit, system-ui, sans-serif; font-size: 13px; color: var(--ink-3); max-width: 760px; }
+
+/*MODULE_CSS*/
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">GM guides &middot; before Foundry sees them</p>
+    <h1>Gardhu&rsquo;s guide and the Eden guide</h1>
+    <p class="standfirst">Both guides as they would be stored in Foundry, drawn by the module&rsquo;s own stylesheet and script inside a stand-in for your GM Screen. Only Foundry itself is faked. The counters start where Gardhu&rsquo;s sheet stands tonight.</p>
+    <ul class="try">
+      <li><b>Tap a counter.</b> In Foundry it spends on Gardhu&rsquo;s sheet itself, the same copy the Stream Deck spends from, so both always agree. Tap a lit pip to spend it, an empty one to give it back. A recharge chip flips between ready and spent.</li>
+      <li><b>Tick a trigger</b> as it happens. <em>Clear ticks</em> empties them for the next time the fight runs.</li>
+      <li><b>The buttons along the top</b> view the scene for you only, open his sheet, or open the full Crossing Out note.</li>
+      <li>In <b>Eden Arc</b>, tap <b>+</b> or <b>&minus;</b> on Attention, and hover a beat for its <b>played</b> tap. After the session I read those taps and check them against the journal before anything goes into the vault.</li>
+      <li>Rings already walked fold shut. Tap a ring&rsquo;s name to open or close it.</li>
+    </ul>
+  </header>
+
+  <div class="bar">
+    <span>Foundry theme</span>
+    <span class="seg" role="group" aria-label="Foundry theme">
+      <button type="button" data-theme-pick="dark" aria-pressed="true">Dark</button>
+      <button type="button" data-theme-pick="light" aria-pressed="false">Light</button>
+    </span>
+    <span>The cell</span>
+    <span class="seg" role="group" aria-label="The cell">
+      <button type="button" data-width-pick="whole" aria-pressed="true">The whole drawer</button>
+      <button type="button" data-width-pick="half" aria-pressed="false">Half of it</button>
+    </span>
+    <button type="button" class="reset" id="reset">Reset the mock</button>
+  </div>
+
+  <div class="drawer theme-dark" id="drawer">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" disabled>Quick Ref</button>
+      <button type="button" role="tab" disabled>Recap</button>
+      <button type="button" role="tab" disabled>NPCs</button>
+      <button type="button" role="tab" disabled>Factions</button>
+      <button type="button" role="tab" disabled>Treasures</button>
+      <button type="button" role="tab" disabled>Locations</button>
+      <button type="button" role="tab" aria-selected="true" data-tab="enc">Encounters</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="arc">Eden Arc</button>
+    </div>
+    <div class="grid" data-pane="enc">
+      <div class="cell"><!--RUN_GUIDE--></div>
+    </div>
+    <div class="grid" data-pane="arc" hidden>
+      <div class="cell"><!--ARC_GUIDE--></div>
+    </div>
+  </div>
+  <p class="caption">One cell filling the tab, the way the module will lay each tab out when you say yes to it. On a phone the columns stack.</p>
+
+  <section class="card" data-q="mock">
+    <h2>Are these the guides?</h2>
+    <p>If they are, here is what happens, all before Saturday&rsquo;s session and after the other sessions have cleared it:</p>
+    <ol>
+      <li>I deploy the module update. It needs an F5 in your browser, no restart.</li>
+      <li>I push both guides into a <em>GM Guides</em> journal folder, GM-only.</li>
+      <li>I re-push the S144 Table Sheet so it carries tonight&rsquo;s fight. After your F5, Foundry offers once to fill <em>Encounters</em> with Gardhu&rsquo;s guide, and once to put the Eden guide in <em>Eden Arc</em>.</li>
+    </ol>
+    <div class="opts">
+      <button class="opt" type="button" data-k="ship"><span class="lbl">Looks right, ship it<span class="rec">Rec.</span></span><span class="sub">The three steps above, tonight.</span></button>
+      <button class="opt" type="button" data-k="change"><span class="lbl">Change something first</span><span class="sub">Say what in the note, and I&rsquo;ll bring it back on this page.</span></button>
+      <button class="opt" type="button" data-k="after"><span class="lbl">Keep it for after Saturday</span><span class="sub">S144 runs on the Session Guide and the Table Sheet as they are.</span></button>
+    </div>
+    <label class="n" for="n-mock">What to change, or anything else</label>
+    <textarea id="n-mock" placeholder="optional"></textarea>
+    <p class="savenote" id="save-mock"></p>
+  </section>
+
+  <footer>The six grey tabs are only there for show. Links inside the pages open their Foundry pages; here they just say what they would open.</footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+/*MODULE_CORE*/
+/*COUNTERS*/
+  var SCENES = {
+    "Eden — The Crossing Out": true,
+    "Eden — The Street in Reborn": true
+  };
+  var STORE = "vel-mock-guides";
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
+  function persist() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+  var START = JSON.parse(JSON.stringify(COUNTERS));
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("on"); }, 2600);
+  }
+
+  var env = {
+    theme: function (node) {
+      var t = node.closest(".theme-light, .theme-dark");
+      return t && t.classList.contains("theme-light") ? "light" : "dark";
+    },
+    getState: function (id) { return state[id] || {}; },
+    setState: function (id, patch) {
+      var cur = state[id] || {};
+      var next = Object.assign({}, cur, patch);
+      if (patch.triggers !== undefined) next.triggers = patch.triggers === null ? {} : Object.assign({}, cur.triggers || {}, patch.triggers);
+      if (patch.beats) next.beats = Object.assign({}, cur.beats || {}, patch.beats);
+      state[id] = next;
+      persist();
+      refreshGuides(id, env);
+    },
+    sceneInfo: function (name) { return { exists: !!SCENES[name], active: false }; },
+    viewScene: function (name) { toast("Views “" + name + "” for you only. The players stay where they are."); },
+    openUuid: function (uuid) {
+      var what = /^Actor\./.test(uuid) ? "his sheet" : /^Compendium\./.test(uuid) ? "the full note from the compendium" : "that page";
+      toast("Opens " + what + ".");
+    },
+    actorCounters: function (uuid) { return COUNTERS[uuid] || null; },
+    setCounter: function (uuid, key, value) {
+      var c = COUNTERS[uuid];
+      if (!c) return;
+      if (key === "legres" || key === "legact") c[key].value = value;
+      else c.uses.forEach(function (u) { if (u.key === key) u.value = value; });
+      refreshCounters(env);
+      toast("Written to " + c.name + "’s sheet in Foundry.");
+    }
+  };
+
+  // Foundry turns @UUID[...]{label} into a link when it shows a page; do the same.
+  document.querySelectorAll(GUIDE_SELECTOR).forEach(function (w) {
+    w.innerHTML = w.innerHTML.replace(/@UUID\[[^\]]+\]\{([^}]+)\}/g, '<a class="content-link" data-mock-link="1">$1</a>');
+    enhanceGuide(w, env);
+  });
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest("a[data-mock-link]");
+    if (!a) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    toast("Opens " + a.textContent + ".");
+  }, true);
+
+  var drawer = document.getElementById("drawer");
+  document.querySelectorAll("[data-theme-pick]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var theme = b.dataset.themePick;
+      drawer.classList.toggle("theme-dark", theme === "dark");
+      drawer.classList.toggle("theme-light", theme === "light");
+      document.querySelectorAll("[data-theme-pick]").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      document.querySelectorAll(".vel-ts").forEach(function (w) {
+        w.classList.toggle("vel-light", theme === "light");
+        w.classList.toggle("vel-dark", theme !== "light");
+      });
+    });
+  });
+  document.querySelectorAll("[data-width-pick]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var half = b.dataset.widthPick === "half";
+      document.querySelectorAll("[data-width-pick]").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      document.querySelectorAll(".grid[data-pane]").forEach(function (g) { g.classList.toggle("half", half); });
+    });
+  });
+  document.querySelectorAll(".tabs [data-tab]").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tabs [data-tab]").forEach(function (o) { o.setAttribute("aria-selected", o === t ? "true" : "false"); });
+      document.querySelectorAll("[data-pane]").forEach(function (p) { p.hidden = p.dataset.pane !== t.dataset.tab; });
+    });
+  });
+  document.getElementById("reset").addEventListener("click", function () {
+    state = {};
+    persist();
+    Object.keys(START).forEach(function (k) { COUNTERS[k] = JSON.parse(JSON.stringify(START[k])); });
+    document.querySelectorAll(GUIDE_SELECTOR).forEach(function (w) { refreshGuides(readMeta(w).entryId, env); });
+    refreshCounters(env);
+  });
+
+  // The review answer, saved where Claude can read it back.
+  var dbp = null;
+  var QUESTIONS = { mock: "Are these the guides?" };
+  function cardOf(q) { return document.querySelector('.card[data-q="' + q + '"]'); }
+  function stampOf(q) { return document.getElementById("save-" + q); }
+  function paint(q, k) {
+    cardOf(q).querySelectorAll("button.opt").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false"); });
+  }
+  function save(q) {
+    var card = cardOf(q);
+    var st = stampOf(q);
+    var picked = card.querySelector('button.opt[aria-pressed="true"]');
+    var note = document.getElementById("n-" + q);
+    if (!dbp) { st.textContent = "not saved: this view can't reach the store"; st.className = "savenote"; return; }
+    var payload = {
+      question: QUESTIONS[q],
+      choice: picked ? picked.dataset.k : null,
+      label: picked ? picked.querySelector(".lbl").textContent.replace(/Rec\.\s*$/, "").trim() : null,
+      note: note.value,
+      at: new Date().toISOString()
+    };
+    dbp.doc("rulings/" + q).set(payload).then(function () {
+      st.textContent = "saved · " + new Date().toLocaleTimeString();
+      st.className = "savenote ok";
+    }).catch(function () {
+      st.textContent = "NOT saved. Tap your answer again";
+      st.className = "savenote";
+    });
+  }
+  Object.keys(QUESTIONS).forEach(function (q) {
+    cardOf(q).querySelectorAll("button.opt").forEach(function (b) {
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () { paint(q, b.dataset.k); save(q); });
+    });
+    var t = null;
+    document.getElementById("n-" + q).addEventListener("input", function () {
+      clearTimeout(t);
+      stampOf(q).textContent = "…";
+      t = setTimeout(function () { save(q); }, 900);
+    });
+  });
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then(function (db) {
+      if (!db) return;
+      dbp = db;
+      Object.keys(QUESTIONS).forEach(function (q) {
+        db.doc("rulings/" + q).get().then(function (d) {
+          if (!d || !d.exists) return;
+          var v = d.data() || {};
+          if (v.choice) paint(q, v.choice);
+          var note = document.getElementById("n-" + q);
+          if (v.note && !note.value) note.value = v.note;
+          stampOf(q).textContent = "answered";
+          stampOf(q).className = "savenote ok";
+        }).catch(function () {});
+      });
+    }).catch(function () {});
+  }
+})();
+</script>

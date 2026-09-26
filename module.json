@@ -1,8 +1,8 @@
 {
   "id": "velumaris-fmod-journals",
   "title": "Velumaris: Journals",
-  "description": "The Velumaris journals at the table. The session Table Sheet as a working sheet (party grid, tickable secrets, a scene tracker, name cards, map chips, boxed read-aloud), and the story pages (NPCs, sessions, places, factions) in the archives' ornate frame with header cards, link previews, same-window links and jump links, in the Velumaris house look, following Foundry's light or dark theme. GM-only pages; nothing changes for players.",
-  "version": "0.3.1",
+  "description": "The Velumaris journals at the table. The session Table Sheet as a working sheet (party grid, tickable secrets, a scene tracker, name cards, map chips, boxed read-aloud), and the story pages (NPCs, sessions, places, factions) in the archives' ornate frame with header cards, link previews, same-window links and jump links, in the Velumaris house look, following Foundry's light or dark theme. And the GM guides: a run guide per fight (the monster's own counters, trigger ticks, scene buttons) and an arc guide (Attention and beats tapped during play), offered into the GM Screen's Encounters and arc tabs. GM-only pages; nothing changes for players.",
+  "version": "0.4.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14"

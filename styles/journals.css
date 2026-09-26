@@ -1,6 +1,7 @@
 /* The story pages (P2) ride in through this import, so adding them needed no new
    module.json entry: Foundry reads that list only when it starts, and a deploy is F5. */
 @import url('story-pages.css');
+@import url('guides.css');
 
 /*
  * Velumaris: Journals.

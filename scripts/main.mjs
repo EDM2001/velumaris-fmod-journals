@@ -9,9 +9,11 @@
 
 import { WRAPPER_SELECTOR, enhance, refreshEntry, npcLeadFromHtml } from './table-sheet.mjs';
 import { enhanceStory, previewFromHtml, kindOfType, typeLabel } from './story-pages.mjs';
+import { GUIDE_SELECTOR, enhanceGuide, refreshGuides, refreshCounters } from './guides.mjs';
 
 const MODULE_ID = 'velumaris-fmod-journals';
 const TABLE_SHEETS_FOLDER = 'Table Sheets';
+const GUIDES_FOLDER = 'GM Guides';
 
 Hooks.once('init', () => {
   game.settings.register(MODULE_ID, 'newLook', {
@@ -47,6 +49,18 @@ Hooks.once('init', () => {
     type: String,
     default: '',
   });
+  game.settings.register(MODULE_ID, 'gmScreenFightsAsked', {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: '',
+  });
+  game.settings.register(MODULE_ID, 'gmScreenArcAsked', {
+    scope: 'client',
+    config: false,
+    type: String,
+    default: '',
+  });
 });
 
 Hooks.once('ready', () => {
@@ -70,6 +84,18 @@ Hooks.once('ready', () => {
         console.error(`${MODULE_ID} | could not build a table sheet page`, err);
       }
     }
+    // The GM guides (run guides and arc guides) ride on the same switch.
+    const guides = [];
+    if (root.matches && root.matches(GUIDE_SELECTOR)) guides.push(root);
+    if (root.querySelectorAll) guides.push(...root.querySelectorAll(GUIDE_SELECTOR));
+    for (const w of guides) {
+      if (w.closest('.ProseMirror, prose-mirror, [contenteditable="true"]')) continue;
+      try {
+        enhanceGuide(w, env);
+      } catch (err) {
+        console.error(`${MODULE_ID} | could not build a guide page`, err);
+      }
+    }
   };
 
   const scanStory = (root) => {
@@ -80,7 +106,7 @@ Hooks.once('ready', () => {
     for (const content of found) {
       if (content.dataset.velStory) continue;
       if (content.closest('.ProseMirror, prose-mirror, [contenteditable="true"]')) continue;
-      if (content.querySelector(WRAPPER_SELECTOR)) continue;
+      if (content.querySelector(WRAPPER_SELECTOR) || content.querySelector(GUIDE_SELECTOR)) continue;
       let meta = null;
       try {
         meta = storyMeta(content);
@@ -110,7 +136,25 @@ Hooks.once('ready', () => {
 
   // A tick made in another window or on another GM client.
   Hooks.on('updateJournalEntry', (entry, change) => {
-    if (change && change.flags && change.flags[MODULE_ID]) refreshEntry(entry.id, env);
+    if (change && change.flags && change.flags[MODULE_ID]) {
+      refreshEntry(entry.id, env);
+      refreshGuides(entry.id, env);
+    }
+  });
+  // A run guide's counters follow the monster's sheet, whoever spent the use:
+  // the guide, the Stream Deck, the sheet itself or a roll.
+  let countersQueued = false;
+  const queueCounters = () => {
+    if (countersQueued) return;
+    countersQueued = true;
+    setTimeout(() => {
+      countersQueued = false;
+      refreshCounters(env);
+    }, 50);
+  };
+  Hooks.on('updateActor', queueCounters);
+  Hooks.on('updateItem', (item) => {
+    if (item && item.parent && item.parent.documentName === 'Actor') queueCounters();
   });
   // A closed window forgets where it came from.
   Hooks.on('closeJournalEntrySheet', (app) => {
@@ -119,12 +163,16 @@ Hooks.once('ready', () => {
 
   checkGmScreen();
   Hooks.on('createJournalEntry', (entry) => {
-    if (isTableSheet(entry)) setTimeout(checkGmScreen, 500);
+    if (isTableSheet(entry) || isArcGuide(entry)) setTimeout(checkGmScreen, 500);
   });
 });
 
 function isTableSheet(entry) {
   return !!(entry && entry.flags && entry.flags.velumaris && entry.flags.velumaris.kind === 'table-sheet');
+}
+
+function isArcGuide(entry) {
+  return !!(entry && entry.flags && entry.flags.velumaris && entry.flags.velumaris.kind === 'arc-guide');
 }
 
 function rerenderJournals() {
@@ -191,7 +239,55 @@ function foundryEnv() {
       // re-applies the saved state everywhere instead.
       const next = foundry.utils.mergeObject(foundry.utils.deepClone(env.getState(entryId)), patch);
       refreshEntry(entryId, { ...env, getState: () => next }, opts);
+      refreshGuides(entryId, { ...env, getState: () => next });
       await entry.update({ [`flags.${MODULE_ID}.state`]: patch }, { render: false });
+    },
+
+    /**
+     * A run guide's counters, off the monster's WORLD actor: the copy the Stream Deck
+     * spends from and THE ACCOUNT COMES DUE gives back to. dnd5e 6 stores what is used
+     * as `spent` and derives `value`, so that is what is read and written here too.
+     */
+    actorCounters(uuid) {
+      let a = null;
+      try {
+        a = fromUuidSync(uuid);
+      } catch {
+        a = null;
+      }
+      if (!a || a.documentName !== 'Actor') return null;
+      const res = a.system.resources || {};
+      const pool = (r) => {
+        const max = Number(r && r.max) || 0;
+        return max ? { max, value: Math.max(0, max - (Number(r.spent) || 0)) } : null;
+      };
+      const uses = [];
+      for (const it of a.items) {
+        const u = it.system && it.system.uses;
+        const max = Number(u && u.max) || 0;
+        if (!max) continue;
+        if (/legendary resistance/i.test(it.name)) continue;
+        const rec = (u.recovery || [])[0] || {};
+        const recharge = rec.period === 'recharge' ? `${String(rec.formula || '6').replace(/^(\d)$/, '$1–6')}` : null;
+        uses.push({ key: it.id, name: it.name.replace(/\s*\(.*\)\s*$/, ''), max, value: Math.max(0, max - (Number(u.spent) || 0)), recharge });
+      }
+      return { name: a.name, legres: pool(res.legres), legact: pool(res.legact), uses };
+    },
+    async setCounter(uuid, key, value) {
+      const a = fromUuidSync(uuid);
+      if (!a) return;
+      if (key === 'legres' || key === 'legact') {
+        const max = Number(a.system.resources[key].max) || 0;
+        await a.update({ [`system.resources.${key}.spent`]: Math.max(0, Math.min(max, max - value)) });
+        return;
+      }
+      const it = a.items.get(key);
+      if (!it) return;
+      const max = Number(it.system.uses.max) || 0;
+      await it.update({ 'system.uses.spent': Math.max(0, Math.min(max, max - value)) });
+    },
+    openUuid(uuid) {
+      fromUuid(uuid).then((d) => d && d.sheet && d.sheet.render(true));
     },
 
     sceneInfo(name) {
@@ -254,7 +350,7 @@ function storyMeta(content) {
   const entry = page.parent;
   const ev = (entry && entry.flags && entry.flags.velumaris) || {};
   const pv = (page.flags && page.flags.velumaris) || {};
-  if (ev.kind === 'table-sheet') return null;
+  if (ev.kind === 'table-sheet' || ev.kind === 'run-guide' || ev.kind === 'arc-guide') return null;
   const isSession = ev.type === 'arc' && pv.session != null;
   if (!ev.type && !isSession) return null;
   const kind = kindOfType(ev.type, isSession);
@@ -411,6 +507,7 @@ function foundryStoryEnv() {
  */
 async function checkGmScreen() {
   if (!game.modules.get('gm-screen')?.active) return;
+  await offerArcTab();
   const folder = game.folders.find((f) => f.type === 'JournalEntry' && f.name === TABLE_SHEETS_FOLDER);
   if (!folder) return;
   const sheets = folder.contents.filter(isTableSheet);
@@ -418,6 +515,7 @@ async function checkGmScreen() {
   const newest = sheets.sort((a, b) => (b.flags.velumaris.session || 0) - (a.flags.velumaris.session || 0))[0];
   await offerRepoint(newest);
   await offerNpcTab(newest);
+  await offerFightsTab(newest);
 }
 
 function gmScreenConfig() {
@@ -523,4 +621,103 @@ async function offerNpcTab(newest) {
   next.grids[gridId].rowOverride = rows;
   await game.settings.set('gm-screen', 'gm-screen-config', next);
   ui.notifications.info(game.i18n.format('VELJOURNALS.GmScreen.NpcDone', { n: picks.length }));
+}
+
+/** A page cell, the shape the GM Screen writes when a page is dragged in (see offerNpcTab). */
+function pageCells(uuids) {
+  const cols = Math.min(3, uuids.length);
+  const entries = {};
+  uuids.forEach((uuid, i) => {
+    const x = (i % cols) + 1;
+    const y = Math.floor(i / cols) + 1;
+    entries[`${x}-${y}`] = { x, y, entryId: `${x}-${y}`, entityUuid: uuid, type: 'JournalEntryPage', isDndNpc: false, isDndNpcStatBlock: false };
+  });
+  return { entries, cols, rows: Math.ceil(uuids.length / cols) };
+}
+
+/** The first text page of each named GM guide, in the order the guide lists them. */
+function guidePages(names) {
+  const folder = game.folders.find((f) => f.type === 'JournalEntry' && f.name === GUIDES_FOLDER);
+  if (!folder) return [];
+  const out = [];
+  for (const name of names) {
+    const entry = folder.contents.find((e) => e.name === name);
+    const page = entry && entry.pages.contents.sort((a, b) => a.sort - b.sort)[0];
+    if (page) out.push({ name, uuid: page.uuid });
+  }
+  return out;
+}
+
+/**
+ * The Encounters tab, filled with the night's run guides (round 1, card 10). The
+ * Session Guide names them under `fights:`; table-sheet.js stamps that list on the
+ * sheet as `flags.velumaris.fights`; this offers, once per sheet, to put each guide in
+ * a cell of the tab called "Encounters". The DM made the tab; nothing here creates one.
+ */
+async function offerFightsTab(newest) {
+  const fights = newest.flags.velumaris.fights;
+  if (!Array.isArray(fights) || !fights.length) return;
+  if (game.settings.get(MODULE_ID, 'gmScreenFightsAsked') === newest.id) return;
+  const config = gmScreenConfig();
+  if (!config) return;
+  const [gridId, grid] = Object.entries(config.grids || {}).find(([, g]) => /^encounters?$/i.test(String(g.name || '').trim())) || [];
+  if (!grid) return;
+  const picks = guidePages(fights);
+  if (!picks.length) return;
+  const now = Object.values(grid.entries || {}).map((c) => c.entityUuid).filter(Boolean);
+  if (now.length === picks.length && picks.every((p) => now.includes(p.uuid))) return;
+
+  await game.settings.set(MODULE_ID, 'gmScreenFightsAsked', newest.id);
+  const ok = await foundry.applications.api.DialogV2.confirm({
+    window: { title: game.i18n.localize('VELJOURNALS.GmScreen.Title') },
+    content: `<p>${game.i18n.format('VELJOURNALS.GmScreen.FightsBody', { names: picks.map((p) => foundry.utils.escapeHTML(p.name.replace(/\s*\(Run\)$/, ''))).join(' · ') })}</p>`,
+    yes: { label: game.i18n.localize('VELJOURNALS.GmScreen.FightsYes') },
+    no: { label: game.i18n.localize('VELJOURNALS.GmScreen.No') },
+  });
+  if (!ok) return;
+  const cells = pageCells(picks.map((p) => p.uuid));
+  const next = foundry.utils.deepClone(config);
+  next.grids[gridId].entries = cells.entries;
+  next.grids[gridId].columnOverride = cells.cols;
+  next.grids[gridId].rowOverride = cells.rows;
+  await game.settings.set('gm-screen', 'gm-screen-config', next);
+  ui.notifications.info(game.i18n.format('VELJOURNALS.GmScreen.FightsDone', { n: picks.length }));
+}
+
+/**
+ * The arc guide, put in the tab named after its arc ("Eden Arc" for Arc 8 - Eden)
+ * once. It is one entry updated in place (assumption a07), so after this the cell
+ * never needs touching again. Offered, never done silently, like every GM Screen change.
+ */
+async function offerArcTab() {
+  const folder = game.folders.find((f) => f.type === 'JournalEntry' && f.name === GUIDES_FOLDER);
+  if (!folder) return;
+  const config = gmScreenConfig();
+  if (!config) return;
+  for (const entry of folder.contents.filter(isArcGuide)) {
+    const page = entry.pages.contents.sort((a, b) => a.sort - b.sort)[0];
+    if (!page) continue;
+    const arcName = String(entry.flags.velumaris.arc || '').replace(/^Arc\s+\d+\s*-\s*/i, '').trim();
+    if (!arcName) continue;
+    // "Eden" or "Eden Arc", any case: compared as plain text, not as a pattern.
+    const wants = [arcName.toLowerCase(), `${arcName} arc`.toLowerCase()];
+    const [gridId, grid] = Object.entries(config.grids || {}).find(([, g]) => wants.includes(String(g.name || '').trim().toLowerCase())) || [];
+    if (!grid) continue;
+    const now = Object.values(grid.entries || {}).map((c) => c.entityUuid).filter(Boolean);
+    if (now.includes(page.uuid)) continue;
+    if (game.settings.get(MODULE_ID, 'gmScreenArcAsked') === entry.id) continue;
+    await game.settings.set(MODULE_ID, 'gmScreenArcAsked', entry.id);
+    const ok = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize('VELJOURNALS.GmScreen.Title') },
+      content: `<p>${game.i18n.format('VELJOURNALS.GmScreen.ArcBody', { guide: foundry.utils.escapeHTML(entry.name), tab: foundry.utils.escapeHTML(grid.name) })}</p>`,
+      yes: { label: game.i18n.localize('VELJOURNALS.GmScreen.ArcYes') },
+      no: { label: game.i18n.localize('VELJOURNALS.GmScreen.No') },
+    });
+    if (!ok) continue;
+    const cells = pageCells([page.uuid]);
+    const next = foundry.utils.deepClone(config);
+    next.grids[gridId].entries = { '1-1': { ...cells.entries['1-1'], spanCols: 3, spanRows: 3 } };
+    await game.settings.set('gm-screen', 'gm-screen-config', next);
+    ui.notifications.info(game.i18n.format('VELJOURNALS.GmScreen.ArcDone', { tab: grid.name }));
+  }
 }

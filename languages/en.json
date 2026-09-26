@@ -3,7 +3,7 @@
     "Settings": {
       "NewLook": {
         "Name": "Velumaris journals: use the new look",
-        "Hint": "The Table Sheet's grid, ticks, scene tracker, name cards and boxed read-aloud. Untick to see the plain pages again (for this browser only)."
+        "Hint": "The Table Sheet's grid, ticks, scene tracker, name cards and boxed read-aloud, and the GM guides' counters, trigger ticks and Attention taps. Untick to see the plain pages again (for this browser only)."
       },
       "StoryLook": {
         "Name": "Velumaris journals: the story pages' new look",
@@ -23,7 +23,13 @@
       "Done": "GM Screen now shows {to} ({n} cell(s) repointed).",
       "NpcBody": "Fill the GM Screen's <strong>NPCs</strong> tab with tonight's cast from the Session Guide?<br><br>{names}",
       "NpcYes": "Fill it",
-      "NpcDone": "The NPCs tab now holds {n} NPC(s)."
+      "NpcDone": "The NPCs tab now holds {n} NPC(s).",
+      "FightsBody": "Fill the GM Screen's <strong>Encounters</strong> tab with tonight's run guides from the Session Guide?<br><br>{names}",
+      "FightsYes": "Fill it",
+      "FightsDone": "The Encounters tab now holds {n} run guide(s).",
+      "ArcBody": "Put <strong>{guide}</strong> in the GM Screen's <strong>{tab}</strong> tab? It updates in place, so this is the only time you'll be asked.",
+      "ArcYes": "Put it there",
+      "ArcDone": "The {tab} tab now holds the arc guide."
     }
   }
 }
